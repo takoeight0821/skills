@@ -10,17 +10,20 @@ Claude Codeのagent skillを管理する共用リポジトリです。miseを使
 ## インストール
 
 ```bash
-# リポジトリをクローン
-git clone https://github.com/takoeight0821/skills.git ~/.local/share/skills
+# リポジトリを任意の場所にクローン
+git clone https://github.com/takoeight0821/skills.git
+cd skills
 
 # インストールスクリプトを実行
-~/.local/share/skills/install.sh
+./install.sh
 ```
 
 インストールスクリプトは以下を行います：
 
-1. skillsリポジトリを`~/.local/share/skills`に配置
-2. miseのタスク定義を`~/.config/mise/config.toml`に追加
+1. クローンしたディレクトリを検出
+2. miseのタスク定義を`~/.config/mise/config.toml`に追加（クローン先を参照）
+
+**注意**: このリポジトリをクローンした場所がスキルの共有元として使用されます。リポジトリを移動した場合は再度`./install.sh`を実行してください。
 
 ## 使い方
 
@@ -67,11 +70,10 @@ mise run sync-skills-project-apply -- --force --prune --exclude
 ```
 === DRY-RUN MODE (use --apply to actually sync) ===
 
-[dry-run] Would add: skill-a.md
-[dry-run] Would add: skill-b.md
+[dry-run] Would add: skills-setup/
 
 Summary:
-  Would add:    2
+  Would add:    1
   Would update: 0
 
 Run with --apply to actually perform these changes.
@@ -81,12 +83,10 @@ Run with --apply to actually perform these changes.
 
 ### 上書き確認
 
-既存のスキルファイルと共有リポジトリのファイルに差分がある場合、警告を表示して上書きの確認を求めます。
+既存のスキルディレクトリと共有リポジトリのディレクトリに差分がある場合、警告を表示して上書きの確認を求めます。
 
 ```
-Warning: skill-a.md differs from shared version
-  Local:  # My customized skill...
-  Shared: # Original skill...
+Warning: skills-setup/ differs from shared version
 Overwrite? [y/N]
 ```
 
@@ -101,11 +101,11 @@ Overwrite? [y/N]
 
 ### 削除されたスキルの処理
 
-`--prune`オプションを使うと、共有リポジトリから削除されたスキルがローカルからも削除されます。マニフェストに記録されているファイルのみが削除対象となるため、プロジェクト固有のスキルは影響を受けません。
+`--prune`オプションを使うと、共有リポジトリから削除されたスキルがローカルからも削除されます。マニフェストに記録されているディレクトリのみが削除対象となるため、プロジェクト固有のスキルは影響を受けません。
 
 ### gitの追跡から除外
 
-`--exclude`オプションを使うと、同期したスキルファイルが`.git/info/exclude`に追加され、gitの追跡から除外されます。これにより、共有スキルがプロジェクトのgit履歴に含まれなくなります。
+`--exclude`オプションを使うと、同期したスキルディレクトリが`.git/info/exclude`に追加され、gitの追跡から除外されます。これにより、共有スキルがプロジェクトのgit履歴に含まれなくなります。
 
 ## コマンドラインオプション
 
@@ -119,15 +119,17 @@ Overwrite? [y/N]
 ## ディレクトリ構造
 
 ```
-~/.local/share/skills/          # 共有リポジトリ
+/path/to/skills/                # クローンしたリポジトリ
+├── .claude/
+│   └── skills/
+│       └── skills-setup/       # 設定用スキル（同期対象外）
+├── skills/                     # 同期対象のスキル
+│   └── my-skill/
+│       ├── SKILL.md
+│       └── ...
 ├── bin/
 │   └── sync-skills.sh          # 同期スクリプト
-├── skills/                     # スキルファイル
-│   ├── skill-a.md
-│   └── skill-b.md
-├── config.sample               # 設定ファイルのサンプル
 ├── install.sh
-├── mise.sample.toml
 └── README.md
 
 ~/.config/skills/
@@ -135,16 +137,14 @@ Overwrite? [y/N]
 
 ~/.claude/                      # グローバルスキル
 ├── skills/
-│   ├── skill-a.md              # ← sync-skills-globalで同期
-│   └── skill-b.md
+│   └── my-skill/               # ← sync-skills-globalで同期
 └── .skills-manifest            # 同期記録
 
 your-project/                   # プロジェクト
 ├── .claude/
 │   ├── skills/
-│   │   ├── skill-a.md          # ← sync-skills-projectで同期
-│   │   ├── skill-b.md
-│   │   └── my-local-skill.md   # プロジェクト固有（影響なし）
+│   │   ├── my-skill/           # ← sync-skills-projectで同期
+│   │   └── my-local-skill/     # プロジェクト固有（影響なし）
 │   ├── .skills-manifest        # 同期記録
 │   └── .skills.conf            # プロジェクト設定ファイル
 └── .git/
@@ -208,8 +208,7 @@ echo -e "apply=true\nforce=true\nprune=true" > .claude/.skills.conf
 
 | 変数名 | デフォルト値 | 説明 |
 |--------|-------------|------|
-| `SKILLS_SHARED_DIR` | `~/.local/share/skills` | 共有リポジトリの場所 |
-| `SKILLS_REPO` | `https://github.com/takoeight0821/skills.git` | リポジトリURL |
+| `SKILLS_SHARED_DIR` | `<repo>/skills` | 共有スキルの場所 |
 
 ## 自動同期（オプション）
 
@@ -224,12 +223,13 @@ enter = "mise run sync-skills-project 2>/dev/null || true"
 
 ## スキルの追加
 
-共有スキルを追加するには、`skills/`ディレクトリにMarkdownファイルを作成してコミットしてください。
+共有スキルを追加するには、`skills/`ディレクトリにスキルディレクトリを作成してコミットしてください。
 
 ```bash
-cd ~/.local/share/skills
-vim skills/my-new-skill.md
-git add skills/my-new-skill.md
+cd /path/to/skills
+mkdir -p skills/my-new-skill
+vim skills/my-new-skill/SKILL.md
+git add skills/my-new-skill
 git commit -m "Add my-new-skill"
 git push
 ```
@@ -240,8 +240,8 @@ git push
 # mise設定から削除
 # ~/.config/mise/config.toml から # BEGIN claude-skills 〜 # END claude-skills を削除
 
-# リポジトリを削除
-rm -rf ~/.local/share/skills
+# リポジトリを削除（クローンした場所）
+rm -rf /path/to/skills
 ```
 
 ## ライセンス

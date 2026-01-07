@@ -25,7 +25,10 @@
 
 set -euo pipefail
 
-SHARED_DIR="${SKILLS_SHARED_DIR:-$HOME/.local/share/skills/skills}"
+# Detect the script's directory and calculate the shared skills directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+SHARED_DIR="${SKILLS_SHARED_DIR:-$REPO_DIR/skills}"
 GLOBAL_CONFIG="$HOME/.config/skills/config"
 PROJECT_CONFIG=".claude/.skills.conf"
 
@@ -118,7 +121,7 @@ Config file format:
 
 Environment:
   SKILLS_SHARED_DIR   Override shared skills directory
-                      (default: ~/.local/share/skills/skills)
+                      (default: <repo>/skills)
 EOF
     exit 0
 }
@@ -200,33 +203,36 @@ UPDATED=0
 SKIPPED=0
 REMOVED=0
 
-# Sync files
+# Sync skill directories
 shopt -s nullglob
-for f in "$SHARED_DIR"/*.md; do
-    name=$(basename "$f")
+for skill_dir in "$SHARED_DIR"/*/; do
+    # Skip if not a directory
+    [ -d "$skill_dir" ] || continue
+
+    name=$(basename "$skill_dir")
     target="$TARGET_DIR/$name"
 
-    if [ -f "$target" ]; then
-        # File exists - check if different
-        if ! diff -q "$f" "$target" > /dev/null 2>&1; then
+    if [ -d "$target" ]; then
+        # Directory exists - check if different
+        if ! diff -rq "$skill_dir" "$target" > /dev/null 2>&1; then
             if [ "$DRY_RUN" = true ]; then
-                print_dry_run "Would update: $name"
+                print_dry_run "Would update: $name/"
                 ((UPDATED++))
             elif [ "$FORCE" = true ]; then
-                cp "$f" "$target"
-                print_success "Updated: $name"
+                rm -rf "$target"
+                cp -r "$skill_dir" "$target"
+                print_success "Updated: $name/"
                 ((UPDATED++))
             else
-                print_warning "$name differs from shared version"
-                echo "  Local:  $(head -c 50 "$target" | tr '\n' ' ')..."
-                echo "  Shared: $(head -c 50 "$f" | tr '\n' ' ')..."
+                print_warning "$name/ differs from shared version"
                 read -p "Overwrite? [y/N] " answer
                 if [[ "$answer" =~ ^[Yy]$ ]]; then
-                    cp "$f" "$target"
-                    print_success "Updated: $name"
+                    rm -rf "$target"
+                    cp -r "$skill_dir" "$target"
+                    print_success "Updated: $name/"
                     ((UPDATED++))
                 else
-                    echo "Skipped: $name"
+                    echo "Skipped: $name/"
                     ((SKIPPED++))
                 fi
             fi
@@ -236,22 +242,22 @@ for f in "$SHARED_DIR"/*.md; do
             grep -qxF "$name" "$MANIFEST_FILE" || echo "$name" >> "$MANIFEST_FILE"
         fi
     else
-        # New file
+        # New skill directory
         if [ "$DRY_RUN" = true ]; then
-            print_dry_run "Would add: $name"
+            print_dry_run "Would add: $name/"
             if [ "$EXCLUDE" = true ]; then
-                print_dry_run "Would add to .git/exclude: .claude/skills/$name"
+                print_dry_run "Would add to .git/exclude: .claude/skills/$name/"
             fi
         else
-            cp "$f" "$target"
-            print_success "Added: $name"
+            cp -r "$skill_dir" "$target"
+            print_success "Added: $name/"
 
             # Add to manifest
             grep -qxF "$name" "$MANIFEST_FILE" || echo "$name" >> "$MANIFEST_FILE"
 
             # Add to .git/exclude if --exclude option is set
             if [ "$EXCLUDE" = true ]; then
-                exclude_entry=".claude/skills/$name"
+                exclude_entry=".claude/skills/$name/"
                 mkdir -p .git/info
                 touch .git/info/exclude
                 if ! grep -qxF "$exclude_entry" .git/info/exclude 2>/dev/null; then
@@ -264,17 +270,17 @@ for f in "$SHARED_DIR"/*.md; do
 done
 shopt -u nullglob
 
-# Prune removed files
+# Prune removed skill directories
 if [ "$PRUNE" = true ]; then
     if [ "$DRY_RUN" = true ]; then
         # Dry-run: just show what would be removed
         if [ -f "$MANIFEST_FILE" ]; then
             while IFS= read -r name || [ -n "$name" ]; do
                 [ -z "$name" ] && continue
-                if [ ! -f "$SHARED_DIR/$name" ] && [ -f "$TARGET_DIR/$name" ]; then
-                    print_dry_run "Would remove: $name"
+                if [ ! -d "$SHARED_DIR/$name" ] && [ -d "$TARGET_DIR/$name" ]; then
+                    print_dry_run "Would remove: $name/"
                     if [ "$EXCLUDE" = true ]; then
-                        print_dry_run "Would remove from .git/exclude: .claude/skills/$name"
+                        print_dry_run "Would remove from .git/exclude: .claude/skills/$name/"
                     fi
                     ((REMOVED++))
                 fi
@@ -287,20 +293,20 @@ if [ "$PRUNE" = true ]; then
         while IFS= read -r name || [ -n "$name" ]; do
             [ -z "$name" ] && continue
 
-            if [ ! -f "$SHARED_DIR/$name" ]; then
-                # File no longer in shared repo
-                if [ -f "$TARGET_DIR/$name" ]; then
-                    rm -f "$TARGET_DIR/$name"
-                    print_warning "Removed: $name"
+            if [ ! -d "$SHARED_DIR/$name" ]; then
+                # Skill directory no longer in shared repo
+                if [ -d "$TARGET_DIR/$name" ]; then
+                    rm -rf "$TARGET_DIR/$name"
+                    print_warning "Removed: $name/"
                     ((REMOVED++))
 
                     # Remove from .git/exclude if --exclude option is set
                     if [ "$EXCLUDE" = true ] && [ -f .git/info/exclude ]; then
                         # macOS and Linux compatible sed
                         if [[ "$OSTYPE" == "darwin"* ]]; then
-                            sed -i '' "/^\.claude\/skills\/${name//\//\\/}$/d" .git/info/exclude 2>/dev/null || true
+                            sed -i '' "/^\.claude\/skills\/${name//\//\\/}\/$/d" .git/info/exclude 2>/dev/null || true
                         else
-                            sed -i "/^\.claude\/skills\/${name//\//\\/}$/d" .git/info/exclude 2>/dev/null || true
+                            sed -i "/^\.claude\/skills\/${name//\//\\/}\/$/d" .git/info/exclude 2>/dev/null || true
                         fi
                     fi
                 fi
