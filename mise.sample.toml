@@ -52,3 +52,55 @@ run = """
 # Uncomment to enable (uses dry-run by default, set apply=true in config for auto-apply)
 # [hooks]
 # enter = "mise run sync-skills-project 2>/dev/null || true"
+
+# =============================================================================
+# Docker development environment tasks
+# =============================================================================
+
+[tasks.docker-build]
+description = "Build the coding agent Docker image"
+run = """
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="${SCRIPT_DIR}"
+docker build -t coding-agent:latest -f "$REPO_DIR/docker/Dockerfile" "$REPO_DIR/docker/"
+"""
+
+[tasks.docker-up]
+description = "Start the coding agent container"
+run = """
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="${SCRIPT_DIR}"
+"$REPO_DIR/docker/run.sh" up "$@"
+"""
+
+[tasks.docker-down]
+description = "Stop the coding agent container"
+run = """
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="${SCRIPT_DIR}"
+"$REPO_DIR/docker/run.sh" down "$@"
+"""
+
+[tasks.docker-claude]
+description = "Run Claude Code in the container"
+run = """
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="${SCRIPT_DIR}"
+"$REPO_DIR/docker/run.sh" claude "$@"
+"""
+
+[tasks.docker-gemini]
+description = "Run Gemini CLI in the container"
+run = """
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="${SCRIPT_DIR}"
+"$REPO_DIR/docker/run.sh" gemini "$@"
+"""
+
+[tasks.docker-shell]
+description = "Open a shell in the container"
+run = """
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="${SCRIPT_DIR}"
+"$REPO_DIR/docker/run.sh" shell "$@"
+"""

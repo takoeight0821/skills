@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+README*
+LICENSE
+
+# Environment files
+.env
+.env.*
+
+# Docker Compose files (not needed in build context)
+docker-compose*.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~

@@ -1,0 +1,22 @@
+# VS Code Dev Container overrides
+# This file is used by devcontainer.json to customize the base docker-compose.yml
+
+services:
+  coding-agent:
+    volumes:
+      # VS Code manages the workspace mount
+      - ..:/workspace:cached
+
+      # SSH agent: VS Code handles forwarding automatically on most platforms
+      # For macOS Docker Desktop, use the magic socket path
+      - /run/host-services/ssh-auth.sock:/tmp/ssh-agent.sock
+
+      # SSH public keys
+      - ${HOME}/.ssh/id_ed25519.pub:/home/agent/.ssh-host/id_ed25519.pub:ro
+      - ${HOME}/.ssh/known_hosts:/home/agent/.ssh-host/known_hosts:ro
+
+      # Persist agent configurations
+      - agent-config:/home/agent/.config
+
+    # Keep container running for VS Code to attach
+    command: sleep infinity
