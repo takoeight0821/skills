@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "takoeight0821-skills",
+  "version": "1.0.0",
+  "description": "Claude Code skills collection for research and development",
+  "owner": {
+    "name": "takoeight0821",
+    "email": "takohati0821@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "takoeight0821-skills",
+      "description": "Skills for researching GitHub repositories, software projects, and academic papers",
+      "version": "1.0.0",
+      "author": {
+        "name": "takoeight0821"
+      },
+      "source": ".",
+      "category": "productivity"
+    }
+  ]
+}
