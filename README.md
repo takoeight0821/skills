@@ -61,6 +61,29 @@ mise run sync-skills-project-apply
 mise run sync-skills-project-apply -- --force --prune --exclude
 ```
 
+## 利用可能なmiseタスク
+
+### スキル管理
+
+| タスク | 説明 |
+|--------|------|
+| `mise run update-shared-skills` | 共有リポジトリを更新 |
+| `mise run sync-skills-global` | グローバルスキルのプレビュー（dry-run） |
+| `mise run sync-skills-global-apply` | グローバルスキルを同期 |
+| `mise run sync-skills-project` | プロジェクトスキルのプレビュー（dry-run） |
+| `mise run sync-skills-project-apply` | プロジェクトスキルを同期 |
+
+### Docker開発環境
+
+| タスク | 説明 |
+|--------|------|
+| `mise run docker-build` | Dockerイメージをビルド |
+| `mise run docker-up` | コンテナを起動 |
+| `mise run docker-down` | コンテナを停止 |
+| `mise run docker-claude` | Claude Codeを実行 |
+| `mise run docker-gemini` | Gemini CLIを実行 |
+| `mise run docker-shell` | コンテナ内でシェルを開く |
+
 ## 動作詳細
 
 ### Dry-runモード（デフォルト）
@@ -123,6 +146,16 @@ Overwrite? [y/N]
 ├── .claude/
 │   └── skills/
 │       └── skills-setup/       # 設定用スキル（同期対象外）
+├── .devcontainer/
+│   └── devcontainer.json       # VS Code Dev Container設定
+├── docker/
+│   ├── Dockerfile              # コーディングエージェント用ベースイメージ
+│   ├── entrypoint.sh           # コンテナ初期化スクリプト
+│   ├── run.sh                  # プラットフォーム自動検出ラッパー
+│   ├── docker-compose.yml      # ベース設定
+│   ├── docker-compose.macos.yml      # Docker Desktop用オーバーライド
+│   ├── docker-compose.rancher.yml    # Rancher Desktop用オーバーライド
+│   └── .env.example            # 環境変数テンプレート
 ├── skills/                     # 同期対象のスキル
 │   └── my-skill/
 │       ├── SKILL.md
@@ -233,6 +266,82 @@ git add skills/my-new-skill
 git commit -m "Add my-new-skill"
 git push
 ```
+
+## Docker開発環境
+
+AIコーディングエージェント（Claude Code、Gemini CLI）用のDockerベースイメージを提供しています。SSHエージェント転送によるGitコミット署名をサポートしています。
+
+### 特徴
+
+- Ubuntu 24.04 LTS ベース
+- Claude Code / Gemini CLI プリインストール
+- SSH署名によるGitコミット署名（git 2.34+）
+- 非rootユーザー実行
+- VS Code Dev Container対応
+- **OS差分の自動吸収**（Linux / macOS Docker Desktop / macOS Rancher Desktop）
+
+### セットアップ
+
+```bash
+# 1. イメージのビルド
+docker build -t coding-agent:latest -f docker/Dockerfile docker/
+
+# 2. 環境変数の設定
+cp docker/.env.example docker/.env
+# docker/.envを編集してAPI keyなどを設定
+```
+
+### 使い方
+
+```bash
+# イメージのビルド
+mise run docker-build
+
+# コンテナの起動・Claude Code実行・停止
+mise run docker-up
+mise run docker-claude
+mise run docker-down
+```
+
+利用可能なタスクの一覧は「[利用可能なmiseタスク](#利用可能なmiseタスク)」を参照してください。
+
+#### run.sh直接実行（miseなしで使用する場合）
+
+```bash
+./docker/run.sh up
+./docker/run.sh claude
+./docker/run.sh down
+./docker/run.sh help
+```
+
+### VS Code Dev Container
+
+devcontainer.jsonはdocker-compose.ymlを使用するため、設定が統一されています。
+
+1. VS Codeでリポジトリを開く
+2. `Cmd+Shift+P` → "Dev Containers: Reopen in Container"
+3. ターミナルで`claude`または`gemini`を実行
+
+### 環境変数
+
+`docker/.env`で設定：
+
+| 変数名 | 説明 |
+|--------|------|
+| `GIT_USER_NAME` | Gitユーザー名 |
+| `GIT_USER_EMAIL` | Gitメールアドレス |
+| `ANTHROPIC_API_KEY` | Claude Code用APIキー |
+| `GOOGLE_API_KEY` | Gemini CLI用APIキー |
+
+### SSHエージェント転送
+
+秘密鍵はホストに残り、署名のみがコンテナに転送されます。`run.sh`がプラットフォームに応じたソケットパスを自動設定します。
+
+| プラットフォーム | 自動検出 |
+|------------------|----------|
+| Linux | ✓ |
+| macOS + Docker Desktop | ✓ |
+| macOS + Rancher Desktop | ✓ |
 
 ## アンインストール
 

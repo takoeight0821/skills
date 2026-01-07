@@ -1,17 +1,14 @@
 #!/bin/bash
-# install.sh - Install Claude skills management tools
+# install.sh - Install Docker-based Claude coding agent
 #
-# This script configures mise tasks for Claude skills management.
+# This script configures mise tasks for the Docker-based coding agent.
 # Run this script from your cloned skills repository.
 
 set -euo pipefail
 
 # Detect the directory where this script is located (= cloned repository)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SKILLS_DIR="$SCRIPT_DIR/.claude/skills"
 MISE_CONFIG="$HOME/.config/mise/config.toml"
-SKILLS_CONFIG="$HOME/.config/skills/config"
-SKILLS_CONFIG_SAMPLE="$SCRIPT_DIR/config.sample"
 
 # Colors
 RED='\033[0;31m'
@@ -31,39 +28,7 @@ if ! command -v mise &> /dev/null; then
     exit 1
 fi
 
-# Verify skills directory exists
-if [ ! -d "$SKILLS_DIR" ]; then
-    print_error "Skills directory not found: $SKILLS_DIR"
-    print_info "Make sure you're running this script from the skills repository root."
-    exit 1
-fi
-
 print_info "Skills repository: $SCRIPT_DIR"
-print_info "Skills directory:  $SKILLS_DIR"
-print_info ""
-
-# Make scripts executable
-chmod +x "$SCRIPT_DIR/bin/"*.sh 2>/dev/null || true
-
-# Copy config sample
-print_info "Setting up skills config..."
-
-mkdir -p "$(dirname "$SKILLS_CONFIG")"
-
-if [ -f "$SKILLS_CONFIG" ]; then
-    print_warning "  Config file already exists: $SKILLS_CONFIG"
-    read -p "  Replace existing config? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        cp "$SKILLS_CONFIG_SAMPLE" "$SKILLS_CONFIG"
-        print_success "  Config file replaced."
-    else
-        print_info "  Skipping config file."
-    fi
-else
-    cp "$SKILLS_CONFIG_SAMPLE" "$SKILLS_CONFIG"
-    print_success "  Config file created: $SKILLS_CONFIG"
-fi
-
 print_info ""
 
 # Update mise config
@@ -73,51 +38,46 @@ print_info "Configuring mise..."
 mkdir -p "$(dirname "$MISE_CONFIG")"
 
 # Generate the new configuration content
-# Note: We embed the actual path since it's determined at install time
-generate_skills_config() {
+generate_docker_config() {
     cat << EOF
 # BEGIN claude-skills
-# Claude skills management - https://github.com/takoeight0821/skills
-# Skills repository: $SCRIPT_DIR
-# All sync tasks run in dry-run mode by default.
-# Use *-apply tasks or set apply=true in config file to actually sync.
+# Docker-based coding agent - https://github.com/takoeight0821/skills
+# Repository: $SCRIPT_DIR
 
-[tasks.update-shared-skills]
-description = "Update shared Claude skills repository"
+[tasks.docker-build]
+description = "Build the coding agent Docker image"
 run = """
-SKILLS_DIR="$SCRIPT_DIR"
-if [ -d "\$SKILLS_DIR" ]; then
-  echo "Updating skills repository..."
-  git -C "\$SKILLS_DIR" pull --quiet
-  echo "Done."
-else
-  echo "Skills repository not found: \$SKILLS_DIR"
-  exit 1
-fi
+cd "$SCRIPT_DIR/docker" && docker compose build "\$@"
 """
 
-[tasks.sync-skills-global]
-description = "Preview sync to ~/.claude/skills (dry-run)"
+[tasks.docker-up]
+description = "Start the coding agent container"
 run = """
-"$SCRIPT_DIR/bin/sync-skills.sh" --global "\$@"
+"$SCRIPT_DIR/docker/run.sh" up "\$@"
 """
 
-[tasks.sync-skills-global-apply]
-description = "Sync shared skills to ~/.claude/skills"
+[tasks.docker-down]
+description = "Stop the coding agent container"
 run = """
-"$SCRIPT_DIR/bin/sync-skills.sh" --global --apply "\$@"
+"$SCRIPT_DIR/docker/run.sh" down "\$@"
 """
 
-[tasks.sync-skills-project]
-description = "Preview sync to .claude/skills (dry-run)"
+[tasks.docker-claude]
+description = "Run Claude Code in the container"
 run = """
-"$SCRIPT_DIR/bin/sync-skills.sh" --project "\$@"
+"$SCRIPT_DIR/docker/run.sh" claude "\$@"
 """
 
-[tasks.sync-skills-project-apply]
-description = "Sync shared skills to .claude/skills"
+[tasks.docker-gemini]
+description = "Run Gemini CLI in the container"
 run = """
-"$SCRIPT_DIR/bin/sync-skills.sh" --project --apply "\$@"
+"$SCRIPT_DIR/docker/run.sh" gemini "\$@"
+"""
+
+[tasks.docker-shell]
+description = "Open a shell in the container"
+run = """
+"$SCRIPT_DIR/docker/run.sh" shell "\$@"
 """
 # END claude-skills
 EOF
@@ -143,9 +103,9 @@ if grep -qF "$MARKER" "$MISE_CONFIG" 2>/dev/null; then
                 # Start of claude-skills section - write new config
                 inside_section=true
                 section_replaced=true
-                generate_skills_config >> "$TMP_FILE"
+                generate_docker_config >> "$TMP_FILE"
             elif [[ "$line" == "$END_MARKER"* ]]; then
-                # End of claude-skills section - skip this line (already written by generate_skills_config)
+                # End of claude-skills section - skip this line (already written by generate_docker_config)
                 inside_section=false
             elif [[ "$inside_section" == false ]]; then
                 # Outside section - copy line as-is
@@ -158,7 +118,7 @@ if grep -qF "$MARKER" "$MISE_CONFIG" 2>/dev/null; then
         mv "$TMP_FILE" "$MISE_CONFIG"
         trap - EXIT
 
-        print_success "  mise configuration updated (in place)."
+        print_success "  mise configuration updated."
     else
         print_info "  Skipping mise configuration update."
         print_success ""
@@ -171,7 +131,7 @@ else
     if [ -s "$MISE_CONFIG" ]; then
         tail -1 "$MISE_CONFIG" | grep -q . && echo "" >> "$MISE_CONFIG"
     fi
-    generate_skills_config >> "$MISE_CONFIG"
+    generate_docker_config >> "$MISE_CONFIG"
     print_success "  mise configuration added."
 fi
 
@@ -180,15 +140,12 @@ print_success ""
 print_success "Installation complete!"
 print_info ""
 print_info "Available commands:"
-print_info "  mise run update-shared-skills      - Update skills repository"
-print_info "  mise run sync-skills-global        - Preview sync to ~/.claude/skills (dry-run)"
-print_info "  mise run sync-skills-global-apply  - Sync to ~/.claude/skills"
-print_info "  mise run sync-skills-project       - Preview sync to .claude/skills (dry-run)"
-print_info "  mise run sync-skills-project-apply - Sync to .claude/skills"
+print_info "  mise run docker-build   - Build the Docker image"
+print_info "  mise run docker-up      - Start the container"
+print_info "  mise run docker-down    - Stop the container"
+print_info "  mise run docker-claude  - Run Claude Code"
+print_info "  mise run docker-gemini  - Run Gemini CLI"
+print_info "  mise run docker-shell   - Open a shell"
 print_info ""
-print_info "Additional flags (pass via command line):"
-print_info "  --force   - Overwrite existing files without confirmation"
-print_info "  --prune   - Remove files deleted from shared repository"
-print_info "  --exclude - Add synced files to .git/exclude"
-print_info ""
-print_info "Or configure defaults in ~/.config/skills/config"
+print_info "Quick start:"
+print_info "  mise run docker-build && mise run docker-up && mise run docker-claude"
