@@ -1,15 +1,17 @@
 #!/bin/bash
 # install.sh - Install Claude skills management tools
 #
-# This script:
-# 1. Clones/updates the skills repository to ~/.local/share/skills
-# 2. Appends mise tasks to ~/.config/mise/config.toml
+# This script configures mise tasks for Claude skills management.
+# Run this script from your cloned skills repository.
 
 set -euo pipefail
 
-SKILLS_REPO="${SKILLS_REPO:-https://github.com/takoeight0821/skills.git}"
-SKILLS_DIR="${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}"
+# Detect the directory where this script is located (= cloned repository)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILLS_DIR="$SCRIPT_DIR/.claude/skills"
 MISE_CONFIG="$HOME/.config/mise/config.toml"
+SKILLS_CONFIG="$HOME/.config/skills/config"
+SKILLS_CONFIG_SAMPLE="$SCRIPT_DIR/config.sample"
 
 # Colors
 RED='\033[0;31m'
@@ -29,98 +31,149 @@ if ! command -v mise &> /dev/null; then
     exit 1
 fi
 
-# Step 1: Clone or update skills repository
-print_info "Step 1: Setting up skills repository..."
-
-if [ -d "$SKILLS_DIR" ]; then
-    print_info "  Updating existing repository at $SKILLS_DIR"
-    git -C "$SKILLS_DIR" pull --quiet
-else
-    print_info "  Cloning repository to $SKILLS_DIR"
-    git clone "$SKILLS_REPO" "$SKILLS_DIR"
+# Verify skills directory exists
+if [ ! -d "$SKILLS_DIR" ]; then
+    print_error "Skills directory not found: $SKILLS_DIR"
+    print_info "Make sure you're running this script from the skills repository root."
+    exit 1
 fi
 
-# Make scripts executable
-chmod +x "$SKILLS_DIR/bin/"*.sh 2>/dev/null || true
-
-print_success "  Skills repository ready."
-
-# Step 2: Update mise config
+print_info "Skills repository: $SCRIPT_DIR"
+print_info "Skills directory:  $SKILLS_DIR"
 print_info ""
-print_info "Step 2: Configuring mise..."
+
+# Make scripts executable
+chmod +x "$SCRIPT_DIR/bin/"*.sh 2>/dev/null || true
+
+# Copy config sample
+print_info "Setting up skills config..."
+
+mkdir -p "$(dirname "$SKILLS_CONFIG")"
+
+if [ -f "$SKILLS_CONFIG" ]; then
+    print_warning "  Config file already exists: $SKILLS_CONFIG"
+    read -p "  Replace existing config? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        cp "$SKILLS_CONFIG_SAMPLE" "$SKILLS_CONFIG"
+        print_success "  Config file replaced."
+    else
+        print_info "  Skipping config file."
+    fi
+else
+    cp "$SKILLS_CONFIG_SAMPLE" "$SKILLS_CONFIG"
+    print_success "  Config file created: $SKILLS_CONFIG"
+fi
+
+print_info ""
+
+# Update mise config
+print_info "Configuring mise..."
 
 # Create config directory if needed
 mkdir -p "$(dirname "$MISE_CONFIG")"
 
-# Check if already configured
-MARKER="# BEGIN claude-skills"
-if grep -qF "$MARKER" "$MISE_CONFIG" 2>/dev/null; then
-    print_warning "  mise config already contains skills configuration."
-    read -p "  Replace existing configuration? [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        # Remove existing configuration
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            sed -i '' "/$MARKER/,/# END claude-skills/d" "$MISE_CONFIG"
-        else
-            sed -i "/$MARKER/,/# END claude-skills/d" "$MISE_CONFIG"
-        fi
-    else
-        print_info "  Skipping mise configuration update."
-        print_success ""
-        print_success "Installation complete!"
-        exit 0
-    fi
-fi
-
-# Append configuration
-cat >> "$MISE_CONFIG" << 'EOF'
-
+# Generate the new configuration content
+# Note: We embed the actual path since it's determined at install time
+generate_skills_config() {
+    cat << EOF
 # BEGIN claude-skills
 # Claude skills management - https://github.com/takoeight0821/skills
+# Skills repository: $SCRIPT_DIR
 # All sync tasks run in dry-run mode by default.
 # Use *-apply tasks or set apply=true in config file to actually sync.
 
 [tasks.update-shared-skills]
 description = "Update shared Claude skills repository"
 run = """
-SKILLS_DIR="${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}"
-if [ -d "$SKILLS_DIR" ]; then
+SKILLS_DIR="$SCRIPT_DIR"
+if [ -d "\$SKILLS_DIR" ]; then
   echo "Updating skills repository..."
-  git -C "$SKILLS_DIR" pull --quiet
+  git -C "\$SKILLS_DIR" pull --quiet
+  echo "Done."
 else
-  echo "Skills not installed. Run install.sh first."
+  echo "Skills repository not found: \$SKILLS_DIR"
   exit 1
 fi
-echo "Done."
 """
 
 [tasks.sync-skills-global]
 description = "Preview sync to ~/.claude/skills (dry-run)"
 run = """
-"${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --global "$@"
+"$SCRIPT_DIR/bin/sync-skills.sh" --global "\$@"
 """
 
 [tasks.sync-skills-global-apply]
 description = "Sync shared skills to ~/.claude/skills"
 run = """
-"${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --global --apply "$@"
+"$SCRIPT_DIR/bin/sync-skills.sh" --global --apply "\$@"
 """
 
 [tasks.sync-skills-project]
 description = "Preview sync to .claude/skills (dry-run)"
 run = """
-"${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --project "$@"
+"$SCRIPT_DIR/bin/sync-skills.sh" --project "\$@"
 """
 
 [tasks.sync-skills-project-apply]
 description = "Sync shared skills to .claude/skills"
 run = """
-"${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --project --apply "$@"
+"$SCRIPT_DIR/bin/sync-skills.sh" --project --apply "\$@"
 """
 # END claude-skills
 EOF
+}
 
-print_success "  mise configuration updated."
+# Check if already configured
+MARKER="# BEGIN claude-skills"
+END_MARKER="# END claude-skills"
+
+if grep -qF "$MARKER" "$MISE_CONFIG" 2>/dev/null; then
+    print_warning "  mise config already contains skills configuration."
+    read -p "  Replace existing configuration? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        # Update existing configuration in place
+        TMP_FILE=$(mktemp)
+        trap "rm -f '$TMP_FILE'" EXIT
+
+        inside_section=false
+        section_replaced=false
+
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            if [[ "$line" == "$MARKER"* ]]; then
+                # Start of claude-skills section - write new config
+                inside_section=true
+                section_replaced=true
+                generate_skills_config >> "$TMP_FILE"
+            elif [[ "$line" == "$END_MARKER"* ]]; then
+                # End of claude-skills section - skip this line (already written by generate_skills_config)
+                inside_section=false
+            elif [[ "$inside_section" == false ]]; then
+                # Outside section - copy line as-is
+                printf '%s\n' "$line" >> "$TMP_FILE"
+            fi
+            # Inside section - skip lines (will be replaced)
+        done < "$MISE_CONFIG"
+
+        # Replace original file
+        mv "$TMP_FILE" "$MISE_CONFIG"
+        trap - EXIT
+
+        print_success "  mise configuration updated (in place)."
+    else
+        print_info "  Skipping mise configuration update."
+        print_success ""
+        print_success "Installation complete!"
+        exit 0
+    fi
+else
+    # No existing configuration - append to file
+    # Only add blank line if file is non-empty and doesn't end with empty line
+    if [ -s "$MISE_CONFIG" ]; then
+        tail -1 "$MISE_CONFIG" | grep -q . && echo "" >> "$MISE_CONFIG"
+    fi
+    generate_skills_config >> "$MISE_CONFIG"
+    print_success "  mise configuration added."
+fi
 
 # Done
 print_success ""
