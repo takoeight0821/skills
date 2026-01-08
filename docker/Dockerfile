@@ -33,14 +33,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo \
     && rm -rf /var/lib/apt/lists/*
 
-# Verify git version >= 2.34 (required for SSH signing)
-RUN git_version=$(git --version | grep -oE '[0-9]+\.[0-9]+' | head -1) && \
-    echo "Git version: $git_version" && \
-    major=$(echo "$git_version" | cut -d. -f1) && \
-    minor=$(echo "$git_version" | cut -d. -f2) && \
-    if [ "$major" -lt 2 ] || { [ "$major" -eq 2 ] && [ "$minor" -lt 34 ]; }; then \
-        echo "ERROR: Git version must be >= 2.34 for SSH signing support" && exit 1; \
-    fi
+# Verify git >= 2.34 (required for SSH signing)
+RUN git_ver=$(git version | awk '{print $3}') && echo "Git: $git_ver" && \
+    [ "$(printf '%s\n' "2.34" "$git_ver" | sort -V | head -1)" = "2.34" ] || \
+    { echo "ERROR: Git >= 2.34 required"; exit 1; }
 
 # =============================================================================
 # Install Node.js via NodeSource
@@ -53,10 +49,8 @@ RUN mkdir -p /etc/apt/keyrings \
        > /etc/apt/sources.list.d/nodesource.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
-# Verify Node.js installation
-RUN node --version && npm --version
+    && rm -rf /var/lib/apt/lists/* \
+    && node --version && npm --version
 
 # =============================================================================
 # Create Non-Root User
@@ -71,9 +65,10 @@ RUN groupadd --gid ${USER_GID} ${USERNAME} 2>/dev/null || groupmod -n ${USERNAME
     && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/${USERNAME} \
     && chmod 0440 /etc/sudoers.d/${USERNAME}
 
-# Create directories for user
+# Create directories for user (including .claude/skills)
 RUN mkdir -p /home/${USERNAME}/.ssh \
     && mkdir -p /home/${USERNAME}/.config \
+    && mkdir -p /home/${USERNAME}/.claude/skills \
     && chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
 
 # =============================================================================
@@ -116,16 +111,16 @@ RUN mkdir -p /etc/ssh/ssh_config.d && \
 # Entrypoint and Final Configuration
 # =============================================================================
 
-# Copy entrypoint script
+# Copy entrypoint script and common library
+COPY docker/lib/common.sh /usr/local/bin/lib/common.sh
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod 755 /usr/local/bin/entrypoint.sh
+RUN chmod 755 /usr/local/bin/entrypoint.sh /usr/local/bin/lib/common.sh
 
 # =============================================================================
 # Copy Skills
 # =============================================================================
 
 # Copy skills to user's .claude/skills directory
-RUN mkdir -p /home/${USERNAME}/.claude/skills
 COPY --chown=${USERNAME}:${USERNAME} skills/ /home/${USERNAME}/.claude/skills/
 
 # Set working directory
