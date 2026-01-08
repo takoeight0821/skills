@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:mise.jdx.dev)",
+      "WebFetch(domain:asdf-vm.com)",
+      "Bash(mkdir:*)",
+      "Bash(chmod:*)",
+      "Skill(example-skills:skill-creator)",
+      "Skill(commit-commands:commit)",
+      "Bash(tree:*)",
+      "Bash(echo:*)",
+      "Skill(plugin-dev:plugin-structure)",
+      "Bash(curl:*)",
+      "Bash(wc:*)",
+      "WebFetch(domain:docs.github.com)",
+      "WebFetch(domain:michael.kefeder.at)",
+      "Bash(shellcheck:*)",
+      "WebFetch(domain:multipass.run)",
+      "WebFetch(domain:canonical.com)",
+      "WebFetch(domain:cloudinit.readthedocs.io)",
+      "WebFetch(domain:documentation.ubuntu.com)",
+      "WebFetch(domain:ubuntu.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:vincent.bernat.ch)",
+      "Bash(./multipass/run.sh:*)",
+      "Bash(multipass info:*)"
+    ]
+  },
+  "language": "japanese"
+}

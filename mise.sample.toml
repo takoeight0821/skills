@@ -6,7 +6,7 @@
 # All sync tasks run in dry-run mode by default.
 # Use *-apply tasks or set apply=true in config file to actually sync.
 
-[tasks.update-shared-skills]
+[tasks."tk:update-shared-skills"]
 description = "Update shared Claude skills repository"
 run = """
 SKILLS_REPO="${SKILLS_REPO:-https://github.com/takoeight0821/skills.git}"
@@ -23,26 +23,26 @@ echo "Done."
 """
 
 # Global sync tasks (dry-run by default)
-[tasks.sync-skills-global]
+[tasks."tk:sync-skills-global"]
 description = "Preview sync to ~/.claude/skills (dry-run)"
 run = """
 "${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --global "$@"
 """
 
-[tasks.sync-skills-global-apply]
+[tasks."tk:sync-skills-global-apply"]
 description = "Sync shared skills to ~/.claude/skills"
 run = """
 "${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --global --apply "$@"
 """
 
 # Project sync tasks (dry-run by default)
-[tasks.sync-skills-project]
+[tasks."tk:sync-skills-project"]
 description = "Preview sync to .claude/skills (dry-run)"
 run = """
 "${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --project "$@"
 """
 
-[tasks.sync-skills-project-apply]
+[tasks."tk:sync-skills-project-apply"]
 description = "Sync shared skills to .claude/skills"
 run = """
 "${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --project --apply "$@"
@@ -51,12 +51,13 @@ run = """
 # Optional: Auto-sync on entering a project directory
 # Uncomment to enable (uses dry-run by default, set apply=true in config for auto-apply)
 # [hooks]
-# enter = "mise run sync-skills-project 2>/dev/null || true"
+# enter = "mise run tk:sync-skills-project 2>/dev/null || true"
 
 # =============================================================================
-# Docker development environment tasks
+# Multipass development environment tasks
 # =============================================================================
-# Docker tasks (docker-build, docker-up, docker-down, docker-claude, etc.)
+# Multipass tasks (vm-launch, vm-ssh, vm-claude, etc.)
 # are installed via ./install.sh to ~/.config/mise/config.toml
 #
 # Run: ./install.sh
+#

@@ -1,0 +1,26 @@
+# =============================================================================
+# Skills VM Configuration Example
+# =============================================================================
+# Copy this file to one of the following locations:
+#
+#   Global (all projects):
+#     cp config.example ~/.config/skills/config
+#
+#   Project-specific (current directory):
+#     cp config.example /path/to/project/.skills.conf
+#
+# Project config (.skills.conf) overrides global config.
+# =============================================================================
+
+# VM Configuration
+# MULTIPASS_VM_NAME=coding-agent
+# MULTIPASS_VM_CPUS=2
+# MULTIPASS_VM_MEMORY=4G
+# MULTIPASS_VM_DISK=20G
+
+# Git Configuration (required for signed commits)
+GIT_USER_NAME="Your Name"
+GIT_USER_EMAIL="you@example.com"
+
+# SSH Signing Key (default: ~/.ssh/id_ed25519.pub)
+# SSH_SIGNING_KEY="$HOME/.ssh/id_ed25519.pub"
