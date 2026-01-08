@@ -52,6 +52,22 @@ CLOUD_INIT="${SCRIPT_DIR}/cloud-init.yaml"
 # Helper Functions
 # =============================================================================
 
+# Convert TERM to a value that works in Ubuntu VM
+# Some terminal emulators (like Ghostty) use custom TERM values
+# that don't have terminfo entries in Ubuntu
+get_vm_term() {
+    local term="${TERM:-xterm-256color}"
+    case "$term" in
+        xterm-ghostty|ghostty)
+            echo "xterm-256color"
+            ;;
+        *)
+            # If terminfo might not exist, fall back to xterm-256color
+            echo "$term"
+            ;;
+    esac
+}
+
 get_vm_ip() {
     multipass info "$VM_NAME" 2>/dev/null | awk '/IPv4/ {print $2}'
 }
@@ -316,12 +332,15 @@ cmd_ssh() {
     log_info "IP: $ip"
     log_info "Working directory: $mount_point"
 
+    local vm_term
+    vm_term=$(get_vm_term)
+
     if [ $# -eq 0 ]; then
         # Interactive shell
-        ssh -A -t "ubuntu@$ip" "cd '$mount_point' && exec \$SHELL"
+        ssh -A -t "ubuntu@$ip" "export TERM=$vm_term COLORTERM=${COLORTERM:-truecolor}; cd '$mount_point' && exec \$SHELL"
     else
         # Execute command
-        ssh -A "ubuntu@$ip" "cd '$mount_point' && $*"
+        ssh -A "ubuntu@$ip" "export TERM=$vm_term COLORTERM=${COLORTERM:-truecolor}; cd '$mount_point' && $*"
     fi
 }
 
@@ -337,8 +356,10 @@ cmd_claude() {
 
     local ip
     ip=$(get_vm_ip)
+    local vm_term
+    vm_term=$(get_vm_term)
     log_info "Working directory: $mount_point"
-    ssh -A -t "ubuntu@$ip" "cd '$mount_point' && claude $*"
+    ssh -A -t "ubuntu@$ip" "export TERM=$vm_term COLORTERM=${COLORTERM:-truecolor}; cd '$mount_point' && claude $*"
 }
 
 cmd_gemini() {
@@ -353,8 +374,10 @@ cmd_gemini() {
 
     local ip
     ip=$(get_vm_ip)
+    local vm_term
+    vm_term=$(get_vm_term)
     log_info "Working directory: $mount_point"
-    ssh -A -t "ubuntu@$ip" "cd '$mount_point' && gemini $*"
+    ssh -A -t "ubuntu@$ip" "export TERM=$vm_term COLORTERM=${COLORTERM:-truecolor}; cd '$mount_point' && gemini $*"
 }
 
 cmd_exec() {
@@ -365,7 +388,9 @@ cmd_exec() {
 
     local ip
     ip=$(get_vm_ip)
-    ssh -A "ubuntu@$ip" "$@"
+    local vm_term
+    vm_term=$(get_vm_term)
+    ssh -A "ubuntu@$ip" "export TERM=$vm_term COLORTERM=${COLORTERM:-truecolor}; $*"
 }
 
 cmd_mount() {
