@@ -1,5 +1,5 @@
 ---
-name: Research
+name: research
 description: Research a GitHub repository, software project, or academic paper in depth. Use when the user asks to "research", "investigate", "analyze", "study", "調べて", or "調査" a repository (owner/repo format), library, framework, programming language project, academic paper (arXiv ID like 2301.12345, paper title, or "論文"), or technical topic. Takes a target argument (repository, project name, paper title, or arXiv ID). Produces a comprehensive markdown report saved to docs/research/.
 ---
 
