@@ -24,7 +24,8 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:vincent.bernat.ch)",
       "Bash(./multipass/run.sh:*)",
-      "Bash(multipass info:*)"
+      "Bash(multipass info:*)",
+      "Bash(git log:*)"
     ]
   },
   "language": "japanese"
