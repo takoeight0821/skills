@@ -2,24 +2,25 @@
 # =============================================================================
 # Coding Agent Runner
 # =============================================================================
-# OS差分を吸収してdocker composeを実行するラッパースクリプト
+# Cross-platform wrapper script for docker compose.
+# Handles OS differences automatically.
 #
 # Usage:
-#   ./run.sh up        # コンテナを起動
-#   ./run.sh down      # コンテナを停止
-#   ./run.sh claude    # Claude Codeを実行
-#   ./run.sh gemini    # Gemini CLIを実行
-#   ./run.sh shell     # インタラクティブシェル
-#   ./run.sh exec CMD  # 任意のコマンドを実行
+#   ./run.sh up        # Start container
+#   ./run.sh down      # Stop container
+#   ./run.sh claude    # Run Claude Code
+#   ./run.sh gemini    # Run Gemini CLI
+#   ./run.sh shell     # Interactive shell
+#   ./run.sh exec CMD  # Execute arbitrary command
 # =============================================================================
-
-set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-cd "$SCRIPT_DIR"
+# shellcheck source=lib/common.sh
+source "${SCRIPT_DIR}/lib/common.sh"
+cd "$SCRIPT_DIR" || exit 1
 
 # =============================================================================
-# プラットフォーム検出
+# Platform Detection
 # =============================================================================
 
 detect_platform() {
@@ -28,7 +29,7 @@ detect_platform() {
             echo "linux"
             ;;
         Darwin*)
-            # macOSの場合、Docker DesktopかRancher Desktopかを判定
+            # On macOS, detect Docker Desktop vs Rancher Desktop
             if command -v rdctl &>/dev/null && rdctl list-settings &>/dev/null 2>&1; then
                 echo "macos-rancher"
             else
@@ -42,7 +43,7 @@ detect_platform() {
 }
 
 # =============================================================================
-# docker compose コマンド構築
+# Build docker compose command
 # =============================================================================
 
 get_compose_files() {
@@ -65,32 +66,26 @@ get_compose_files() {
 }
 
 # =============================================================================
-# メイン
+# Main
 # =============================================================================
 
 PLATFORM=$(detect_platform)
+# shellcheck disable=SC2086 # Intentional word splitting for compose file flags
 COMPOSE_FILES=$(get_compose_files "$PLATFORM")
-
-# カラー出力
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
-
-log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 
 show_help() {
     echo "Usage: $0 <command> [args...]"
     echo ""
     echo "Commands:"
-    echo "  up       コンテナを起動（バックグラウンド）"
-    echo "  down     コンテナを停止"
-    echo "  claude   Claude Codeを実行"
-    echo "  gemini   Gemini CLIを実行"
-    echo "  shell    インタラクティブシェル"
-    echo "  exec     任意のコマンドを実行"
-    echo "  logs     ログを表示"
-    echo "  status   コンテナの状態を表示"
-    echo "  build    イメージをビルド"
+    echo "  up       Start container (background)"
+    echo "  down     Stop container"
+    echo "  claude   Run Claude Code"
+    echo "  gemini   Run Gemini CLI"
+    echo "  shell    Interactive shell"
+    echo "  exec     Execute arbitrary command"
+    echo "  logs     Show logs"
+    echo "  status   Show container status"
+    echo "  build    Build image"
     echo ""
     echo "Detected platform: $PLATFORM"
 }
@@ -141,7 +136,7 @@ case "$COMMAND" in
         docker compose $COMPOSE_FILES build "$@"
         ;;
     *)
-        # その他のdocker composeコマンドをそのまま実行
+        # Pass through other docker compose commands
         docker compose $COMPOSE_FILES "$COMMAND" "$@"
         ;;
 esac

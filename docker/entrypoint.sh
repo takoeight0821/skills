@@ -8,24 +8,17 @@
 # - SSH signing key configuration
 # =============================================================================
 
-set -e
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
-
-log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+# Source common library
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/common.sh
+source "${SCRIPT_DIR}/lib/common.sh"
 
 # =============================================================================
 # SSH Agent Verification
 # =============================================================================
 
 verify_ssh_agent() {
-    if [ -n "$SSH_AUTH_SOCK" ]; then
+    if [ -n "${SSH_AUTH_SOCK:-}" ]; then
         if [ -S "$SSH_AUTH_SOCK" ]; then
             log_info "SSH agent socket found at $SSH_AUTH_SOCK"
             # Test if we can communicate with the agent
@@ -50,20 +43,20 @@ verify_ssh_agent() {
 
 configure_git() {
     # Set git user name if provided
-    if [ -n "$GIT_USER_NAME" ]; then
+    if [ -n "${GIT_USER_NAME:-}" ]; then
         git config --global user.name "$GIT_USER_NAME"
         log_info "Git user.name set to: $GIT_USER_NAME"
     fi
 
     # Set git user email if provided
-    if [ -n "$GIT_USER_EMAIL" ]; then
+    if [ -n "${GIT_USER_EMAIL:-}" ]; then
         git config --global user.email "$GIT_USER_EMAIL"
         log_info "Git user.email set to: $GIT_USER_EMAIL"
     fi
 
     # Configure SSH signing key
     # Priority: GIT_SIGNING_KEY env var > ~/.ssh/id_ed25519.pub > ~/.ssh/id_rsa.pub
-    if [ -n "$GIT_SIGNING_KEY" ]; then
+    if [ -n "${GIT_SIGNING_KEY:-}" ]; then
         git config --global user.signingkey "$GIT_SIGNING_KEY"
         log_info "Git signing key set to: $GIT_SIGNING_KEY"
     elif [ -f "$HOME/.ssh/id_ed25519.pub" ]; then
@@ -78,7 +71,7 @@ configure_git() {
     fi
 
     # Set up allowed signers file for verification (if email is configured)
-    if [ -n "$GIT_USER_EMAIL" ]; then
+    if [ -n "${GIT_USER_EMAIL:-}" ]; then
         SIGNING_KEY=$(git config --global user.signingkey 2>/dev/null || true)
         if [ -n "$SIGNING_KEY" ] && [ -f "$SIGNING_KEY" ]; then
             mkdir -p "$HOME/.ssh"

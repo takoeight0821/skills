@@ -4,35 +4,25 @@
 # This script configures mise tasks for the Docker-based coding agent.
 # Run this script from your cloned skills repository.
 
-set -euo pipefail
-
 # Detect the directory where this script is located (= cloned repository)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=docker/lib/common.sh
+source "${SCRIPT_DIR}/docker/lib/common.sh"
+
 MISE_CONFIG="$HOME/.config/mise/config.toml"
-
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
-
-print_error() { echo -e "${RED}Error: $1${NC}" >&2; }
-print_success() { echo -e "${GREEN}$1${NC}"; }
-print_warning() { echo -e "${YELLOW}$1${NC}"; }
-print_info() { echo -e "$1"; }
 
 # Check for mise
 if ! command -v mise &> /dev/null; then
-    print_error "mise is not installed. Please install mise first."
+    log_error "mise is not installed. Please install mise first."
     echo "See: https://mise.jdx.dev/getting-started.html"
     exit 1
 fi
 
-print_info "Skills repository: $SCRIPT_DIR"
-print_info ""
+echo "Skills repository: $SCRIPT_DIR"
+echo ""
 
 # Update mise config
-print_info "Configuring mise..."
+echo "Configuring mise..."
 
 # Create config directory if needed
 mkdir -p "$(dirname "$MISE_CONFIG")"
@@ -88,21 +78,19 @@ MARKER="# BEGIN claude-skills"
 END_MARKER="# END claude-skills"
 
 if grep -qF "$MARKER" "$MISE_CONFIG" 2>/dev/null; then
-    print_warning "  mise config already contains skills configuration."
-    read -p "  Replace existing configuration? [y/N] " answer
+    log_warn "  mise config already contains skills configuration."
+    read -rp "  Replace existing configuration? [y/N] " answer
     if [[ "$answer" =~ ^[Yy]$ ]]; then
         # Update existing configuration in place
         TMP_FILE=$(mktemp)
-        trap "rm -f '$TMP_FILE'" EXIT
+        trap 'rm -f "$TMP_FILE"' EXIT
 
         inside_section=false
-        section_replaced=false
 
         while IFS= read -r line || [[ -n "$line" ]]; do
             if [[ "$line" == "$MARKER"* ]]; then
                 # Start of claude-skills section - write new config
                 inside_section=true
-                section_replaced=true
                 generate_docker_config >> "$TMP_FILE"
             elif [[ "$line" == "$END_MARKER"* ]]; then
                 # End of claude-skills section - skip this line (already written by generate_docker_config)
@@ -118,11 +106,11 @@ if grep -qF "$MARKER" "$MISE_CONFIG" 2>/dev/null; then
         mv "$TMP_FILE" "$MISE_CONFIG"
         trap - EXIT
 
-        print_success "  mise configuration updated."
+        log_success "  mise configuration updated."
     else
-        print_info "  Skipping mise configuration update."
-        print_success ""
-        print_success "Installation complete!"
+        echo "  Skipping mise configuration update."
+        log_success ""
+        log_success "Installation complete!"
         exit 0
     fi
 else
@@ -132,20 +120,20 @@ else
         tail -1 "$MISE_CONFIG" | grep -q . && echo "" >> "$MISE_CONFIG"
     fi
     generate_docker_config >> "$MISE_CONFIG"
-    print_success "  mise configuration added."
+    log_success "  mise configuration added."
 fi
 
 # Done
-print_success ""
-print_success "Installation complete!"
-print_info ""
-print_info "Available commands:"
-print_info "  mise run docker-build   - Build the Docker image"
-print_info "  mise run docker-up      - Start the container"
-print_info "  mise run docker-down    - Stop the container"
-print_info "  mise run docker-claude  - Run Claude Code"
-print_info "  mise run docker-gemini  - Run Gemini CLI"
-print_info "  mise run docker-shell   - Open a shell"
-print_info ""
-print_info "Quick start:"
-print_info "  mise run docker-build && mise run docker-up && mise run docker-claude"
+log_success ""
+log_success "Installation complete!"
+echo ""
+echo "Available commands:"
+echo "  mise run docker-build   - Build the Docker image"
+echo "  mise run docker-up      - Start the container"
+echo "  mise run docker-down    - Stop the container"
+echo "  mise run docker-claude  - Run Claude Code"
+echo "  mise run docker-gemini  - Run Gemini CLI"
+echo "  mise run docker-shell   - Open a shell"
+echo ""
+echo "Quick start:"
+echo "  mise run docker-build && mise run docker-up && mise run docker-claude"
