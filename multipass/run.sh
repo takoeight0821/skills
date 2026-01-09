@@ -89,16 +89,18 @@ get_mount_point() {
     echo "/mnt/${sanitized}"
 }
 
-# 指定パスがマウント済みかチェック
+# 指定パスがマウント済みかチェック（完全一致）
 is_path_mounted() {
     local mount_point="$1"
-    multipass info "$VM_NAME" 2>/dev/null | grep -q "$mount_point"
+    # Use word boundary to avoid partial matches (e.g., /mnt/foo matching /mnt/foobar)
+    multipass info "$VM_NAME" 2>/dev/null | grep -qE "(^|[[:space:]])${mount_point}([[:space:]]|$)"
 }
 
 # 自動マウント（カレントディレクトリ → /mnt/xxx）
+# WORK_DIR環境変数が設定されていればそれを使用、なければpwd
 auto_mount() {
     local src_path
-    src_path="$(pwd)"
+    src_path="${WORK_DIR:-$(pwd)}"
     local mount_point
     mount_point=$(get_mount_point "$src_path")
 
@@ -223,6 +225,76 @@ sync_skills_to_vm() {
     fi
 }
 
+# Mount ~/.aws config directory
+mount_config_dirs() {
+    # Mount ~/.aws if exists and not already mounted
+    if [ -d "$HOME/.aws" ]; then
+        if ! is_path_mounted "/home/ubuntu/.aws"; then
+            log_info "Mounting ~/.aws to VM..."
+            multipass mount "$HOME/.aws" "${VM_NAME}:/home/ubuntu/.aws"
+            log_success "~/.aws mounted."
+        fi
+    else
+        log_info "~/.aws not found on host, skipping mount."
+    fi
+}
+
+# Setup Claude Code config in VM (settings only, login in VM)
+setup_claude_config() {
+    # Unmount ~/.claude if it was previously mounted (legacy cleanup)
+    if is_path_mounted "/home/ubuntu/.claude"; then
+        log_info "Unmounting legacy ~/.claude mount..."
+        multipass umount "${VM_NAME}:/home/ubuntu/.claude" 2>/dev/null || true
+    fi
+
+    # Ensure .claude directory exists
+    multipass exec "$VM_NAME" -- mkdir -p /home/ubuntu/.claude
+
+    # Copy VM-specific settings.json (always overwrite)
+    local vm_settings_file="${SCRIPT_DIR}/vm-settings.json"
+    if [ -f "$vm_settings_file" ]; then
+        log_info "Copying VM-specific settings.json..."
+        multipass transfer "$vm_settings_file" "${VM_NAME}:/home/ubuntu/.claude/settings.json"
+        log_success "VM settings.json copied."
+    else
+        log_warn "vm-settings.json not found at $vm_settings_file"
+    fi
+}
+
+# Install Claude Code marketplaces in VM (only if not already installed)
+install_claude_marketplaces() {
+    local marketplaces_file="${SCRIPT_DIR}/vm-marketplaces.txt"
+    if [ ! -f "$marketplaces_file" ]; then
+        log_warn "vm-marketplaces.txt not found, skipping marketplace installation."
+        return 0
+    fi
+
+    log_info "Checking Claude Code marketplaces in VM..."
+    local ip
+    ip=$(get_vm_ip)
+
+    # Get list of installed marketplaces from VM
+    local installed
+    installed=$(multipass exec "$VM_NAME" -- cat /home/ubuntu/.claude/plugins/known_marketplaces.json 2>/dev/null || echo "{}")
+
+    while IFS= read -r line || [ -n "$line" ]; do
+        # Skip empty lines and comments
+        [[ -z "$line" || "$line" =~ ^# ]] && continue
+
+        local repo="$line"
+        # Check if marketplace is already installed (by checking if repo appears in known_marketplaces.json)
+        if echo "$installed" | grep -q "\"repo\": \"$repo\""; then
+            log_info "  Already installed: $repo"
+        else
+            log_info "  Installing marketplace: $repo"
+            # Use ssh to run claude command (bash -i to load PATH from .bashrc)
+            ssh -A "ubuntu@$ip" "bash -i -c 'claude marketplace add github:$repo'" 2>/dev/null || true
+        fi
+    done < "$marketplaces_file"
+
+    log_success "Marketplaces check complete."
+}
+
 # =============================================================================
 # Commands
 # =============================================================================
@@ -251,10 +323,20 @@ cmd_launch() {
     fi
 
     configure_git_in_vm
-    sync_skills_to_vm
+    mount_config_dirs
+    setup_claude_config
 
     local ip
     ip=$(get_vm_ip)
+    local vm_term
+    vm_term=$(get_vm_term)
+
+    # Run claude /login for initial authentication (required before marketplace install)
+    log_info "Running Claude Code login..."
+    ssh -A -t "ubuntu@$ip" "bash -i -c 'export TERM=$vm_term COLORTERM=${COLORTERM:-truecolor}; claude /login'"
+
+    install_claude_marketplaces
+
     log_success ""
     log_success "VM '$VM_NAME' is ready!"
     log_success "IP Address: $ip"
@@ -281,6 +363,10 @@ cmd_start() {
         multipass start "$VM_NAME"
         log_success "VM started."
     fi
+
+    # Re-mount config directories after VM start
+    mount_config_dirs
+    setup_claude_config
 
     local ip
     ip=$(get_vm_ip)
@@ -322,9 +408,12 @@ cmd_ssh() {
         exit 1
     fi
 
+    # Ensure config directories are mounted and settings are applied
+    mount_config_dirs
+    setup_claude_config
+
     local mount_point
     mount_point=$(auto_mount)
-    trap "auto_umount '$mount_point'" EXIT
 
     local ip
     ip=$(get_vm_ip)
@@ -350,16 +439,20 @@ cmd_claude() {
         exit 1
     fi
 
+    # Ensure config directories are mounted and settings are applied
+    mount_config_dirs
+    setup_claude_config
+
     local mount_point
     mount_point=$(auto_mount)
-    trap "auto_umount '$mount_point'" EXIT
 
     local ip
     ip=$(get_vm_ip)
     local vm_term
     vm_term=$(get_vm_term)
     log_info "Working directory: $mount_point"
-    ssh -A -t "ubuntu@$ip" "export TERM=$vm_term COLORTERM=${COLORTERM:-truecolor}; cd '$mount_point' && claude $*"
+    # Use bash -i to load .bashrc (for mise and other shell configurations)
+    ssh -A -t "ubuntu@$ip" "bash -i -c 'export TERM=$vm_term COLORTERM=${COLORTERM:-truecolor}; cd \"$mount_point\" && claude $*'"
 }
 
 cmd_gemini() {
@@ -368,16 +461,19 @@ cmd_gemini() {
         exit 1
     fi
 
+    # Ensure config directories are mounted
+    mount_config_dirs
+
     local mount_point
     mount_point=$(auto_mount)
-    trap "auto_umount '$mount_point'" EXIT
 
     local ip
     ip=$(get_vm_ip)
     local vm_term
     vm_term=$(get_vm_term)
     log_info "Working directory: $mount_point"
-    ssh -A -t "ubuntu@$ip" "export TERM=$vm_term COLORTERM=${COLORTERM:-truecolor}; cd '$mount_point' && gemini $*"
+    # Use bash -i to load .bashrc (for mise and other shell configurations)
+    ssh -A -t "ubuntu@$ip" "bash -i -c 'export TERM=$vm_term COLORTERM=${COLORTERM:-truecolor}; cd \"$mount_point\" && gemini $*'"
 }
 
 cmd_exec() {

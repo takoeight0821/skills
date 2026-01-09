@@ -1,0 +1,33 @@
+# =============================================================================
+# Docker Coding Agent Configuration
+# =============================================================================
+# Copy this file to ~/.config/skills/config for global settings
+# or to .skills.conf in your project directory for project-specific settings.
+#
+# Project settings override global settings.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Docker Resources
+# -----------------------------------------------------------------------------
+# Container and image naming
+# DOCKER_CONTAINER_NAME=coding-agent-docker
+# DOCKER_IMAGE_NAME=coding-agent:latest
+
+# Resource limits
+# DOCKER_CPUS=2
+# DOCKER_MEMORY=4g
+
+# -----------------------------------------------------------------------------
+# Git Configuration (Required for Signed Commits)
+# -----------------------------------------------------------------------------
+# These are required for Git commits to be properly attributed and signed.
+# GIT_USER_NAME="Your Name"
+# GIT_USER_EMAIL="you@example.com"
+
+# -----------------------------------------------------------------------------
+# SSH Signing Key
+# -----------------------------------------------------------------------------
+# Path to your SSH public key used for signing commits.
+# Default: ~/.ssh/id_ed25519.pub
+# SSH_SIGNING_KEY="$HOME/.ssh/id_ed25519.pub"
