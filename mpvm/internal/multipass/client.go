@@ -11,12 +11,12 @@ import (
 	"time"
 )
 
-type Client struct {
+type SystemClient struct {
 	binary string
 }
 
-func NewClient() *Client {
-	return &Client{
+func NewClient() Client {
+	return &SystemClient{
 		binary: "multipass",
 	}
 }
@@ -29,7 +29,7 @@ type LaunchOptions struct {
 	CloudInit string
 }
 
-func (c *Client) Launch(opts LaunchOptions) error {
+func (c *SystemClient) Launch(opts LaunchOptions) error {
 	args := []string{
 		"launch",
 		"--name", opts.Name,
@@ -46,14 +46,14 @@ func (c *Client) Launch(opts LaunchOptions) error {
 	return c.runWithOutput(args...)
 }
 
-func (c *Client) runWithOutput(args ...string) error {
+func (c *SystemClient) runWithOutput(args ...string) error {
 	cmd := exec.Command(c.binary, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
-func (c *Client) VMExists(name string) (bool, error) {
+func (c *SystemClient) VMExists(name string) (bool, error) {
 	output, err := c.runOutput("list", "--format", "csv")
 	if err != nil {
 		return false, err
@@ -68,7 +68,7 @@ func (c *Client) VMExists(name string) (bool, error) {
 	return false, nil
 }
 
-func (c *Client) VMRunning(name string) (bool, error) {
+func (c *SystemClient) VMRunning(name string) (bool, error) {
 	output, err := c.runOutput("list", "--format", "csv")
 	if err != nil {
 		return false, err
@@ -83,7 +83,7 @@ func (c *Client) VMRunning(name string) (bool, error) {
 	return false, nil
 }
 
-func (c *Client) GetIP(name string) (string, error) {
+func (c *SystemClient) GetIP(name string) (string, error) {
 	output, err := c.runOutput("list", "--format", "csv")
 	if err != nil {
 		return "", err
@@ -101,15 +101,15 @@ func (c *Client) GetIP(name string) (string, error) {
 	return "", fmt.Errorf("IP address not found for VM %s", name)
 }
 
-func (c *Client) Start(name string) error {
+func (c *SystemClient) Start(name string) error {
 	return c.run("start", name)
 }
 
-func (c *Client) Stop(name string) error {
+func (c *SystemClient) Stop(name string) error {
 	return c.run("stop", name)
 }
 
-func (c *Client) Delete(name string, purge bool) error {
+func (c *SystemClient) Delete(name string, purge bool) error {
 	if err := c.run("delete", name); err != nil {
 		return err
 	}
@@ -119,17 +119,17 @@ func (c *Client) Delete(name string, purge bool) error {
 	return nil
 }
 
-func (c *Client) Exec(name string, command ...string) error {
+func (c *SystemClient) Exec(name string, command ...string) error {
 	args := append([]string{"exec", name, "--"}, command...)
 	return c.run(args...)
 }
 
-func (c *Client) ExecOutput(name string, command ...string) (string, error) {
+func (c *SystemClient) ExecOutput(name string, command ...string) (string, error) {
 	args := append([]string{"exec", name, "--"}, command...)
 	return c.runOutput(args...)
 }
 
-func (c *Client) ExecInteractive(name string, command ...string) error {
+func (c *SystemClient) ExecInteractive(name string, command ...string) error {
 	args := append([]string{"exec", name, "--"}, command...)
 	cmd := exec.Command(c.binary, args...)
 	cmd.Stdin = os.Stdin
@@ -138,7 +138,7 @@ func (c *Client) ExecInteractive(name string, command ...string) error {
 	return cmd.Run()
 }
 
-func (c *Client) Shell(name string) error {
+func (c *SystemClient) Shell(name string) error {
 	cmd := exec.Command(c.binary, "shell", name)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -146,23 +146,23 @@ func (c *Client) Shell(name string) error {
 	return cmd.Run()
 }
 
-func (c *Client) Mount(source, target string) error {
+func (c *SystemClient) Mount(source, target string) error {
 	return c.run("mount", source, target)
 }
 
-func (c *Client) Umount(target string) error {
+func (c *SystemClient) Umount(target string) error {
 	return c.run("umount", target)
 }
 
-func (c *Client) Transfer(source, dest string) error {
+func (c *SystemClient) Transfer(source, dest string) error {
 	return c.run("transfer", source, dest)
 }
 
-func (c *Client) TransferRecursive(source, dest string) error {
+func (c *SystemClient) TransferRecursive(source, dest string) error {
 	return c.run("transfer", "-r", source, dest)
 }
 
-func (c *Client) WaitForCloudInit(name string, timeoutSeconds int, logFunc func(string, ...interface{})) error {
+func (c *SystemClient) WaitForCloudInit(name string, timeoutSeconds int, logFunc func(string, ...interface{})) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
 	defer cancel()
 
@@ -201,15 +201,15 @@ func (c *Client) WaitForCloudInit(name string, timeoutSeconds int, logFunc func(
 	}
 }
 
-func (c *Client) Info(name string) (string, error) {
+func (c *SystemClient) Info(name string) (string, error) {
 	return c.runOutput("info", name)
 }
 
-func (c *Client) List() (string, error) {
+func (c *SystemClient) List() (string, error) {
 	return c.runOutput("list")
 }
 
-func (c *Client) IsMounted(vmName, sourcePath string) (bool, error) {
+func (c *SystemClient) IsMounted(vmName, sourcePath string) (bool, error) {
 	output, err := c.runOutput("info", vmName)
 	if err != nil {
 		return false, err
@@ -219,7 +219,7 @@ func (c *Client) IsMounted(vmName, sourcePath string) (bool, error) {
 	return strings.Contains(output, sourcePath), nil
 }
 
-func (c *Client) GetMountPoint(vmName, sourcePath string) string {
+func (c *SystemClient) GetMountPoint(vmName, sourcePath string) string {
 	// Convert source path to mount point
 	// e.g., /home/user/project -> /mnt/home-user-project
 	clean := strings.ReplaceAll(sourcePath, "/", "-")
@@ -227,7 +227,7 @@ func (c *Client) GetMountPoint(vmName, sourcePath string) string {
 	return filepath.Join("/mnt", clean)
 }
 
-func (c *Client) run(args ...string) error {
+func (c *SystemClient) run(args ...string) error {
 	cmd := exec.Command(c.binary, args...)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
@@ -242,7 +242,7 @@ func (c *Client) run(args ...string) error {
 	return nil
 }
 
-func (c *Client) runOutput(args ...string) (string, error) {
+func (c *SystemClient) runOutput(args ...string) (string, error) {
 	cmd := exec.Command(c.binary, args...)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -258,7 +258,7 @@ func (c *Client) runOutput(args ...string) (string, error) {
 	return stdout.String(), nil
 }
 
-func (c *Client) IsInstalled() bool {
+func (c *SystemClient) IsInstalled() bool {
 	_, err := exec.LookPath(c.binary)
 	return err == nil
 }

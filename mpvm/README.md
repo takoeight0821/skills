@@ -125,3 +125,27 @@ mpvm completion fish | source
 
 - [Multipass](https://multipass.run/) installed
 - SSH key for authentication and git signing (default: `~/.ssh/id_ed25519.pub` or `~/.ssh/id_rsa.pub`)
+
+## Development
+
+### Prerequisites
+- Go 1.22+
+- Make
+
+### Build and Test
+```bash
+# Run unit tests
+make test
+
+# Build binary
+make build
+
+# Install locally
+make install
+```
+
+### Linting
+```bash
+make lint
+```
+

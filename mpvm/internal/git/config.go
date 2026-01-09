@@ -9,7 +9,7 @@ import (
 	"github.com/takoeight0821/skills/mpvm/internal/multipass"
 )
 
-func ConfigureInVM(client *multipass.Client, cfg *config.Config, vmName string) error {
+func ConfigureInVM(client multipass.Client, cfg *config.Config, vmName string) error {
 	// Set git user name
 	if cfg.Git.UserName != "" {
 		if err := client.Exec(vmName, "git", "config", "--global", "user.name", cfg.Git.UserName); err != nil {
@@ -32,7 +32,7 @@ func ConfigureInVM(client *multipass.Client, cfg *config.Config, vmName string) 
 	return nil
 }
 
-func setupSSHSigning(client *multipass.Client, cfg *config.Config, vmName string) error {
+func setupSSHSigning(client multipass.Client, cfg *config.Config, vmName string) error {
 	signingKeyPath := config.ExpandPath(cfg.SSH.SigningKey)
 	if signingKeyPath == "" {
 		return nil
