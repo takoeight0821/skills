@@ -20,6 +20,7 @@ packages:
   - jq
   - openssh-client
   - build-essential
+  - trash-cli
 
 # =============================================================================
 # Install Node.js 22.x and Coding Agents
@@ -42,7 +43,13 @@ runcmd:
   - |
     sudo -u ubuntu bash -c 'curl https://mise.run | sh'
   - |
-    sudo -u ubuntu bash -c 'echo "eval \"\$(~/.local/bin/mise activate bash)\"" >> ~/.bashrc'
+    sudo -u ubuntu bash -c 'echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> ~/.profile'
+  - |
+    sudo -u ubuntu bash -c 'echo "export PATH=\"\$HOME/.local/bin:\$PATH\"" >> ~/.bashrc'
+  - |
+    sudo -u ubuntu bash -c 'echo "eval \"\$(mise activate bash)\"" >> ~/.bashrc'
+  - |
+    sudo -u ubuntu bash -c 'echo "eval \"\$(mise activate bash)\"" >> ~/.profile'
   # Create .claude/skills directory for ubuntu user
   - sudo -u ubuntu mkdir -p /home/ubuntu/.claude/skills
   # Configure SSH for common Git hosting services

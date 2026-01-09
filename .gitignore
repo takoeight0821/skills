@@ -1,2 +1,6 @@
 # Claude Code local settings
 .claude/settings.local.json
+
+# VM config files (use .sample as template)
+vm-settings.json
+vm-marketplaces.txt

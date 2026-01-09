@@ -1,7 +1,7 @@
 #!/bin/bash
-# install.sh - Install Multipass-based Claude coding agent
+# install.sh - Install Multipass/Docker-based Claude coding agent
 #
-# This script configures mise tasks for the Multipass-based coding agent.
+# This script configures mise tasks for the Multipass and Docker-based coding agents.
 # Run this script from your cloned skills repository.
 
 # Detect the directory where this script is located (= cloned repository)
@@ -86,6 +86,70 @@ run = """
 description = "Mount directory to VM"
 run = """
 "$SCRIPT_DIR/multipass/run.sh" mount "\$@"
+"""
+
+# -----------------------------------------------------------------------------
+# Docker-based coding agent
+# -----------------------------------------------------------------------------
+
+[tasks."tk:docker-launch"]
+description = "Build and start the coding agent container"
+run = """
+"$SCRIPT_DIR/docker/run.sh" launch "\$@"
+"""
+
+[tasks."tk:docker-start"]
+description = "Start the coding agent container"
+run = """
+"$SCRIPT_DIR/docker/run.sh" start "\$@"
+"""
+
+[tasks."tk:docker-stop"]
+description = "Stop the coding agent container"
+run = """
+"$SCRIPT_DIR/docker/run.sh" stop "\$@"
+"""
+
+[tasks."tk:docker-delete"]
+description = "Delete the coding agent container"
+run = """
+"$SCRIPT_DIR/docker/run.sh" delete "\$@"
+"""
+
+[tasks."tk:docker-ssh"]
+description = "Interactive shell in container"
+run = """
+"$SCRIPT_DIR/docker/run.sh" ssh "\$@"
+"""
+
+[tasks."tk:docker-claude"]
+description = "Run Claude Code in container"
+run = """
+"$SCRIPT_DIR/docker/run.sh" claude "\$@"
+"""
+
+[tasks."tk:docker-gemini"]
+description = "Run Gemini CLI in container"
+run = """
+"$SCRIPT_DIR/docker/run.sh" gemini "\$@"
+"""
+
+[tasks."tk:docker-status"]
+description = "Show container status"
+run = """
+"$SCRIPT_DIR/docker/run.sh" status "\$@"
+"""
+
+[tasks."tk:docker-logs"]
+description = "Show container logs"
+run = """
+"$SCRIPT_DIR/docker/run.sh" logs "\$@"
+"""
+
+[tasks."tk:docker-configure-git"]
+description = "Re-configure git in container"
+run = """
+"$SCRIPT_DIR/docker/run.sh" configure-git "\$@"
 """
 # END claude-skills
 EOF
@@ -226,11 +290,17 @@ EOF
 
     cat >> "$SKILLS_CONFIG" << EOF
 
-# VM resources (uncomment to customize)
+# Multipass VM resources (uncomment to customize)
 # MULTIPASS_VM_NAME=coding-agent
 # MULTIPASS_VM_CPUS=2
 # MULTIPASS_VM_MEMORY=4G
 # MULTIPASS_VM_DISK=20G
+
+# Docker container resources (uncomment to customize)
+# DOCKER_CONTAINER_NAME=coding-agent-docker
+# DOCKER_IMAGE_NAME=coding-agent:latest
+# DOCKER_CPUS=2
+# DOCKER_MEMORY=4g
 EOF
 
     log_success "  Configuration saved to $SKILLS_CONFIG"
@@ -266,7 +336,7 @@ fi
 log_success ""
 log_success "Installation complete!"
 echo ""
-echo "Available commands:"
+echo "Available commands (Multipass VM):"
 echo "  mise run tk:vm-launch   - Create and start VM"
 echo "  mise run tk:vm-start    - Start VM"
 echo "  mise run tk:vm-stop     - Stop VM"
@@ -277,5 +347,19 @@ echo "  mise run tk:vm-gemini   - Run Gemini CLI"
 echo "  mise run tk:vm-status   - Show VM status"
 echo "  mise run tk:vm-mount    - Mount directory"
 echo ""
-echo "Quick start:"
+echo "Available commands (Docker):"
+echo "  mise run tk:docker-launch   - Build and start container"
+echo "  mise run tk:docker-start    - Start container"
+echo "  mise run tk:docker-stop     - Stop container"
+echo "  mise run tk:docker-delete   - Delete container"
+echo "  mise run tk:docker-ssh      - Interactive shell"
+echo "  mise run tk:docker-claude   - Run Claude Code"
+echo "  mise run tk:docker-gemini   - Run Gemini CLI"
+echo "  mise run tk:docker-status   - Show container status"
+echo "  mise run tk:docker-logs     - Show container logs"
+echo ""
+echo "Quick start (Multipass):"
 echo "  mise run tk:vm-launch && mise run tk:vm-claude"
+echo ""
+echo "Quick start (Docker):"
+echo "  mise run tk:docker-launch && mise run tk:docker-claude"
