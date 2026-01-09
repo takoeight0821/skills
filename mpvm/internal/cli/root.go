@@ -16,7 +16,7 @@ var (
 	vmName  string
 	cfg     *config.Config
 	log     *logging.Logger
-	client  *multipass.Client
+	client  multipass.Client
 )
 
 var rootCmd = &cobra.Command{
