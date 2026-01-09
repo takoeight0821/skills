@@ -124,17 +124,18 @@ get_env_args() {
     args="$args -e COLORTERM=${COLORTERM:-truecolor}"
 
     if [ -n "${GIT_USER_NAME:-}" ]; then
-        args="$args -e GIT_USER_NAME=$GIT_USER_NAME"
+        # Use printf %q to escape special characters including spaces
+        args="$args -e GIT_USER_NAME=$(printf '%q' "$GIT_USER_NAME")"
     fi
 
     if [ -n "${GIT_USER_EMAIL:-}" ]; then
-        args="$args -e GIT_USER_EMAIL=$GIT_USER_EMAIL"
+        args="$args -e GIT_USER_EMAIL=$(printf '%q' "$GIT_USER_EMAIL")"
     fi
 
     local pubkey_content
     pubkey_content=$(get_ssh_pubkey_content)
     if [ -n "$pubkey_content" ]; then
-        args="$args -e SSH_SIGNING_KEY_CONTENT=$pubkey_content"
+        args="$args -e SSH_SIGNING_KEY_CONTENT=$(printf '%q' "$pubkey_content")"
     fi
 
     echo "$args"
@@ -145,7 +146,10 @@ setup_claude_config() {
     local vm_settings_file="${SCRIPT_DIR}/vm-settings.json"
     if [ -f "$vm_settings_file" ]; then
         log_info "Copying VM-specific settings.json..."
-        docker cp "$vm_settings_file" "${CONTAINER_NAME}:/home/agent/.claude/settings.json"
+        # Dereference symlink if needed (docker cp doesn't follow symlinks)
+        local real_settings_file
+        real_settings_file=$(readlink -f "$vm_settings_file" 2>/dev/null || echo "$vm_settings_file")
+        docker cp "$real_settings_file" "${CONTAINER_NAME}:/home/agent/.claude/settings.json"
         log_success "VM settings.json copied."
     else
         log_warn "vm-settings.json not found at $vm_settings_file"
@@ -182,8 +186,8 @@ install_claude_marketplaces() {
         else
             log_info "  Installing marketplace: $repo"
             # shellcheck disable=SC2086
-            docker exec -it $ssh_agent_opts $env_args "$CONTAINER_NAME" \
-                bash -ic "claude marketplace add github:$repo" 2>/dev/null || true
+            eval docker exec -it $ssh_agent_opts $env_args '"$CONTAINER_NAME"' \
+                bash -ic '"claude marketplace add github:$repo"' 2>/dev/null || true
         fi
     done < "$marketplaces_file"
 
@@ -199,7 +203,7 @@ configure_git_in_container() {
 
     # Run entrypoint to configure git (it reads env vars)
     # shellcheck disable=SC2086
-    docker exec $env_args "$CONTAINER_NAME" /entrypoint.sh true
+    eval docker exec $env_args '"$CONTAINER_NAME"' /entrypoint.sh true
 
     if [ -n "${GIT_USER_NAME:-}" ]; then
         log_info "Git user.name set to: $GIT_USER_NAME"
@@ -280,17 +284,17 @@ cmd_launch() {
         env_args=$(get_env_args)
 
         # shellcheck disable=SC2086
-        docker create \
-            --name "$CONTAINER_NAME" \
+        eval docker create \
+            --name '"$CONTAINER_NAME"' \
             --hostname coding-agent \
-            --cpus "$CONTAINER_CPUS" \
-            --memory "$CONTAINER_MEMORY" \
-            -v "$CLAUDE_VOLUME:/home/agent/.claude" \
+            --cpus '"$CONTAINER_CPUS"' \
+            --memory '"$CONTAINER_MEMORY"' \
+            -v '"$CLAUDE_VOLUME:/home/agent/.claude"' \
             $config_mounts \
             $ssh_agent_opts \
             $env_args \
             -it \
-            "$IMAGE_NAME" \
+            '"$IMAGE_NAME"' \
             tail -f /dev/null
 
         docker start "$CONTAINER_NAME"
@@ -312,8 +316,8 @@ cmd_launch() {
     env_args=$(get_env_args)
 
     # shellcheck disable=SC2086
-    docker exec -it $ssh_agent_opts $env_args "$CONTAINER_NAME" \
-        bash -ic "claude /login"
+    eval docker exec -it $ssh_agent_opts $env_args '"$CONTAINER_NAME"' \
+        bash -ic '"claude /login"'
 
     echo ""
     echo "Use:"
@@ -406,29 +410,29 @@ cmd_ssh() {
     if [ $# -eq 0 ]; then
         # Interactive shell with current directory mounted
         # shellcheck disable=SC2086
-        docker run --rm -it \
+        eval docker run --rm -it \
             --hostname coding-agent \
-            -v "$CLAUDE_VOLUME:/home/agent/.claude" \
-            -v "$src_path:$mount_point" \
-            -w "$mount_point" \
+            -v '"$CLAUDE_VOLUME:/home/agent/.claude"' \
+            -v '"$src_path:$mount_point"' \
+            -w '"$mount_point"' \
             $config_mounts \
             $ssh_agent_opts \
             $env_args \
-            "$IMAGE_NAME" \
+            '"$IMAGE_NAME"' \
             bash
     else
         # Execute command
         # shellcheck disable=SC2086
-        docker run --rm -it \
+        eval docker run --rm -it \
             --hostname coding-agent \
-            -v "$CLAUDE_VOLUME:/home/agent/.claude" \
-            -v "$src_path:$mount_point" \
-            -w "$mount_point" \
+            -v '"$CLAUDE_VOLUME:/home/agent/.claude"' \
+            -v '"$src_path:$mount_point"' \
+            -w '"$mount_point"' \
             $config_mounts \
             $ssh_agent_opts \
             $env_args \
-            "$IMAGE_NAME" \
-            bash -c "$*"
+            '"$IMAGE_NAME"' \
+            bash -c '"$*"'
     fi
 }
 
@@ -458,16 +462,16 @@ cmd_claude() {
     log_info "Working directory: $mount_point (mounted from $src_path)"
 
     # shellcheck disable=SC2086
-    docker run --rm -it \
+    eval docker run --rm -it \
         --hostname coding-agent \
-        -v "$CLAUDE_VOLUME:/home/agent/.claude" \
-        -v "$src_path:$mount_point" \
-        -w "$mount_point" \
+        -v '"$CLAUDE_VOLUME:/home/agent/.claude"' \
+        -v '"$src_path:$mount_point"' \
+        -w '"$mount_point"' \
         $config_mounts \
         $ssh_agent_opts \
         $env_args \
-        "$IMAGE_NAME" \
-        bash -ic "claude $*"
+        '"$IMAGE_NAME"' \
+        bash -ic '"claude $*"'
 }
 
 cmd_gemini() {
@@ -490,16 +494,16 @@ cmd_gemini() {
     log_info "Working directory: $mount_point (mounted from $src_path)"
 
     # shellcheck disable=SC2086
-    docker run --rm -it \
+    eval docker run --rm -it \
         --hostname coding-agent \
-        -v "$CLAUDE_VOLUME:/home/agent/.claude" \
-        -v "$src_path:$mount_point" \
-        -w "$mount_point" \
+        -v '"$CLAUDE_VOLUME:/home/agent/.claude"' \
+        -v '"$src_path:$mount_point"' \
+        -w '"$mount_point"' \
         $config_mounts \
         $ssh_agent_opts \
         $env_args \
-        "$IMAGE_NAME" \
-        bash -ic "gemini $*"
+        '"$IMAGE_NAME"' \
+        bash -ic '"gemini $*"'
 }
 
 cmd_exec() {
@@ -514,7 +518,7 @@ cmd_exec() {
     env_args=$(get_env_args)
 
     # shellcheck disable=SC2086
-    docker exec -it $ssh_agent_opts $env_args "$CONTAINER_NAME" "$@"
+    eval docker exec -it $ssh_agent_opts $env_args '"$CONTAINER_NAME"' '"$@"'
 }
 
 cmd_mount() {
