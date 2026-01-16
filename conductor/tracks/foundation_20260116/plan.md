@@ -18,8 +18,8 @@
 - [x] Task: Verify Docker setup (dry-run/build only). [commit: 15817c5]
     - [x] Sub-task: `docker build` - `coding-agent` image built successfully.
 
-## Phase 3: Finalization
+## Phase 3: Finalization [checkpoint: 5e43436]
 - [x] Task: Update `README.md` with any new findings or structure changes. [commit: 5850233]
     - [x] Sub-task: Added mpvm CLI section as recommended approach.
     - [x] Sub-task: Updated prerequisites (Multipass, Go 1.22+).
-- [ ] Task: Conductor - User Manual Verification 'Finalization' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Finalization' (Protocol in workflow.md) [commit: 5e43436]
