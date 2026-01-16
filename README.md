@@ -1,378 +1,103 @@
 # Claude Skills
 
-Claude Codeのagent skillを管理する共用リポジトリです。miseを使って各プロジェクトの`.claude/skills`やグローバルの`~/.claude/skills`に展開して利用します。
+Claude Codeのagent skillを管理する共用リポジトリです。`skills` CLI（または `mise`）を使って各プロジェクトの`.claude/skills`やグローバルの`~/.claude/skills`に展開して利用します。
 
 ## 必要条件
 
-- [mise](https://mise.jdx.dev/) がインストールされていること
 - Git
 - [Multipass](https://multipass.run/) - VM管理の場合
-- Go 1.22+ - mpvm CLIのインストールに必要
+- [Docker](https://www.docker.com/) - コンテナ管理の場合
+- Go 1.22+ - `skills` CLIのインストールに必要
+- [mise](https://mise.jdx.dev/) - タスクランナーとして使用する場合（任意）
 
-## mpvm CLI（推奨）
+## skills CLI（推奨）
 
-Multipass VM管理には、Goで書かれた`mpvm` CLIを使用することを推奨します：
+VM管理、コンテナ管理、スキル同期を統合したGo製のCLIツール `skills` の使用を推奨します。
+
+### インストール
 
 ```bash
-# インストール
-go install github.com/takoeight0821/skills/mpvm/cmd/mpvm@latest
+# Goを使ってインストール
+go install github.com/takoeight0821/skills/mpvm/cmd/skills@latest
+```
 
-# VM作成・起動
-mpvm launch
+### クイックスタート
 
-# Claude Code実行
-mpvm claude
+```bash
+# 初期設定
+skills config init
 
-# Gemini CLI実行
-mpvm gemini
+# VMの作成と起動
+skills vm launch
+
+# スキルの同期（グローバル）
+skills sync --global --apply
+
+# Claude Codeの実行
+skills vm claude
 ```
 
 詳細は [mpvm/README.md](mpvm/README.md) を参照してください。
 
-## インストール
-
-```bash
-# リポジトリを任意の場所にクローン
-git clone https://github.com/takoeight0821/skills.git
-cd skills
-
-# インストールスクリプトを実行
-./install.sh
-```
-
-インストールスクリプトは以下を行います：
-
-1. クローンしたディレクトリを検出
-2. miseのタスク定義を`~/.config/mise/config.toml`に追加（クローン先を参照）
-
-**注意**: このリポジトリをクローンした場所がスキルの共有元として使用されます。リポジトリを移動した場合は再度`./install.sh`を実行してください。
-
 ## 使い方
 
-### 共有スキルの更新
+### スキルの同期
+
+`skills sync` コマンドを使用して、本リポジトリのスキルをローカル環境に同期します。
+
+#### グローバルに同期（~/.claude/skills）
 
 ```bash
-mise run update-shared-skills
-```
-
-リモートリポジトリから最新のスキルを取得します。
-
-### グローバルに同期（~/.claude/skills）
-
-```bash
-# プレビュー（dry-run、実際には同期しない）
-mise run sync-skills-global
+# プレビュー（dry-run）
+skills sync --global --dry-run
 
 # 実際に同期
-mise run sync-skills-global-apply
-
-# オプションを追加して同期
-mise run sync-skills-global-apply -- --force --prune
+skills sync --global --apply
 ```
 
-### プロジェクトに同期（.claude/skills）
+#### プロジェクトに同期（.claude/skills）
 
 ```bash
-# プレビュー（dry-run、実際には同期しない）
-mise run sync-skills-project
+# プレビュー（dry-run）
+skills sync --project --dry-run
 
 # 実際に同期
-mise run sync-skills-project-apply
-
-# オプションを追加して同期
-mise run sync-skills-project-apply -- --force --prune --exclude
+skills sync --project --apply
 ```
 
-## 利用可能なmiseタスク
+### 開発環境の管理
 
-### スキル管理
+#### Multipass VM
 
-| タスク | 説明 |
-|--------|------|
-| `mise run update-shared-skills` | 共有リポジトリを更新 |
-| `mise run sync-skills-global` | グローバルスキルのプレビュー（dry-run） |
-| `mise run sync-skills-global-apply` | グローバルスキルを同期 |
-| `mise run sync-skills-project` | プロジェクトスキルのプレビュー（dry-run） |
-| `mise run sync-skills-project-apply` | プロジェクトスキルを同期 |
-
-### Docker開発環境
-
-| タスク | 説明 |
-|--------|------|
-| `mise run docker-build` | Dockerイメージをビルド |
-| `mise run docker-up` | コンテナを起動 |
-| `mise run docker-down` | コンテナを停止 |
-| `mise run docker-claude` | Claude Codeを実行 |
-| `mise run docker-gemini` | Gemini CLIを実行 |
-| `mise run docker-shell` | コンテナ内でシェルを開く |
-
-## 動作詳細
-
-### Dry-runモード（デフォルト）
-
-デフォルトではdry-runモードで動作し、実際にはファイルの変更を行いません。何が行われるかをプレビューできます。
-
-```
-=== DRY-RUN MODE (use --apply to actually sync) ===
-
-[dry-run] Would add: skills-setup/
-
-Summary:
-  Would add:    1
-  Would update: 0
-
-Run with --apply to actually perform these changes.
+```bash
+skills vm launch   # 作成と起動
+skills vm ssh      # SSH接続
+skills vm stop     # 停止
 ```
 
-実際に同期するには`*-apply`タスクを使用するか、設定ファイルで`apply=true`を指定します。
+#### Docker Container
 
-### 上書き確認
-
-既存のスキルディレクトリと共有リポジトリのディレクトリに差分がある場合、警告を表示して上書きの確認を求めます。
-
+```bash
+skills docker launch   # ビルドと起動
+skills docker ssh      # シェル接続
+skills docker stop     # 停止
 ```
-Warning: skills-setup/ differs from shared version
-Overwrite? [y/N]
-```
-
-`--force`オプションを使うと確認なしで上書きします。
-
-### 同期の記録
-
-同期したスキルは`.skills-manifest`ファイルに記録されます：
-
-- グローバル: `~/.claude/.skills-manifest`
-- プロジェクト: `.claude/.skills-manifest`
-
-### 削除されたスキルの処理
-
-`--prune`オプションを使うと、共有リポジトリから削除されたスキルがローカルからも削除されます。マニフェストに記録されているディレクトリのみが削除対象となるため、プロジェクト固有のスキルは影響を受けません。
-
-### gitの追跡から除外
-
-`--exclude`オプションを使うと、同期したスキルディレクトリが`.git/info/exclude`に追加され、gitの追跡から除外されます。これにより、共有スキルがプロジェクトのgit履歴に含まれなくなります。
-
-## コマンドラインオプション
-
-| オプション | 説明 |
-|-----------|------|
-| `--apply` | 実際に同期を実行（デフォルトはdry-run） |
-| `--force` | 確認なしで上書き |
-| `--prune` | 削除されたスキルを削除 |
-| `--exclude` | .git/excludeに追加（project modeのみ） |
 
 ## ディレクトリ構造
 
 ```
 /path/to/skills/                # クローンしたリポジトリ
-├── .claude/
-│   └── skills/
-│       └── skills-setup/       # 設定用スキル（同期対象外）
-├── .devcontainer/
-│   └── devcontainer.json       # VS Code Dev Container設定
-├── docker/
-│   ├── Dockerfile              # コーディングエージェント用ベースイメージ
-│   ├── entrypoint.sh           # コンテナ初期化スクリプト
-│   ├── run.sh                  # プラットフォーム自動検出ラッパー
-│   ├── docker-compose.yml      # ベース設定
-│   ├── docker-compose.macos.yml      # Docker Desktop用オーバーライド
-│   ├── docker-compose.rancher.yml    # Rancher Desktop用オーバーライド
-│   └── .env.example            # 環境変数テンプレート
 ├── skills/                     # 同期対象のスキル
 │   └── my-skill/
 │       ├── SKILL.md
 │       └── ...
-├── bin/
-│   └── sync-skills.sh          # 同期スクリプト
-├── install.sh
+├── mpvm/                       # skills CLIのソースコード
+│   ├── cmd/skills/             # エントリポイント
+│   └── ...
+├── docker/                     # Docker関連ファイル
+├── multipass/                  # Multipass関連ファイル
+├── install.sh                  # 旧インストールスクリプト（mise用）
 └── README.md
-
-~/.config/skills/
-└── config                      # グローバル設定ファイル
-
-~/.claude/                      # グローバルスキル
-├── skills/
-│   └── my-skill/               # ← sync-skills-globalで同期
-└── .skills-manifest            # 同期記録
-
-your-project/                   # プロジェクト
-├── .claude/
-│   ├── skills/
-│   │   ├── my-skill/           # ← sync-skills-projectで同期
-│   │   └── my-local-skill/     # プロジェクト固有（影響なし）
-│   ├── .skills-manifest        # 同期記録
-│   └── .skills.conf            # プロジェクト設定ファイル
-└── .git/
-    └── info/
-        └── exclude             # --excludeオプションで追加
-```
-
-## 設定ファイル
-
-コマンドラインオプションの代わりに、設定ファイルでデフォルトの動作を指定できます。
-
-### 設定ファイルの場所
-
-| ファイル | 説明 |
-|---------|------|
-| `~/.config/skills/config` | グローバル設定 |
-| `.claude/.skills.conf` | プロジェクト設定 |
-
-### 優先順位
-
-1. コマンドラインフラグ（最優先）
-2. プロジェクト設定ファイル
-3. グローバル設定ファイル
-4. デフォルト値
-
-### 設定ファイルの形式
-
-```ini
-# コメント行
-apply=true
-force=true
-prune=false
-exclude=true
-```
-
-### 設定項目
-
-| 項目 | デフォルト | 説明 |
-|------|-----------|------|
-| `apply` | `false` | 実際に同期を実行（falseはdry-run） |
-| `force` | `false` | 確認なしで上書き |
-| `prune` | `false` | 削除されたスキルを削除 |
-| `exclude` | `false` | .git/excludeに追加 |
-
-### 使用例
-
-グローバル設定で常に実行モードにする:
-
-```bash
-mkdir -p ~/.config/skills
-echo "apply=true" > ~/.config/skills/config
-```
-
-プロジェクト設定で`apply`、`force`、`prune`を有効にする:
-
-```bash
-echo -e "apply=true\nforce=true\nprune=true" > .claude/.skills.conf
-```
-
-## 環境変数
-
-| 変数名 | デフォルト値 | 説明 |
-|--------|-------------|------|
-| `SKILLS_SHARED_DIR` | `<repo>/skills` | 共有スキルの場所 |
-
-## 自動同期（オプション）
-
-プロジェクトディレクトリに入った時に自動でプレビューを表示したい場合は、`~/.config/mise/config.toml`に以下を追加してください：
-
-```toml
-[hooks]
-enter = "mise run sync-skills-project 2>/dev/null || true"
-```
-
-自動で実際に同期したい場合は、設定ファイルで`apply=true`を指定するか、タスクを変更してください。
-
-## スキルの追加
-
-共有スキルを追加するには、`skills/`ディレクトリにスキルディレクトリを作成してコミットしてください。
-
-```bash
-cd /path/to/skills
-mkdir -p skills/my-new-skill
-vim skills/my-new-skill/SKILL.md
-git add skills/my-new-skill
-git commit -m "Add my-new-skill"
-git push
-```
-
-## Docker開発環境
-
-AIコーディングエージェント（Claude Code、Gemini CLI）用のDockerベースイメージを提供しています。SSHエージェント転送によるGitコミット署名をサポートしています。
-
-### 特徴
-
-- Ubuntu 24.04 LTS ベース
-- Claude Code / Gemini CLI プリインストール
-- SSH署名によるGitコミット署名（git 2.34+）
-- 非rootユーザー実行
-- VS Code Dev Container対応
-- **OS差分の自動吸収**（Linux / macOS Docker Desktop / macOS Rancher Desktop）
-
-### セットアップ
-
-```bash
-# 1. イメージのビルド
-docker build -t coding-agent:latest -f docker/Dockerfile docker/
-
-# 2. 環境変数の設定
-cp docker/.env.example docker/.env
-# docker/.envを編集してAPI keyなどを設定
-```
-
-### 使い方
-
-```bash
-# イメージのビルド
-mise run docker-build
-
-# コンテナの起動・Claude Code実行・停止
-mise run docker-up
-mise run docker-claude
-mise run docker-down
-```
-
-利用可能なタスクの一覧は「[利用可能なmiseタスク](#利用可能なmiseタスク)」を参照してください。
-
-#### run.sh直接実行（miseなしで使用する場合）
-
-```bash
-./docker/run.sh up
-./docker/run.sh claude
-./docker/run.sh down
-./docker/run.sh help
-```
-
-### VS Code Dev Container
-
-devcontainer.jsonはdocker-compose.ymlを使用するため、設定が統一されています。
-
-1. VS Codeでリポジトリを開く
-2. `Cmd+Shift+P` → "Dev Containers: Reopen in Container"
-3. ターミナルで`claude`または`gemini`を実行
-
-### 環境変数
-
-`docker/.env`で設定：
-
-| 変数名 | 説明 |
-|--------|------|
-| `GIT_USER_NAME` | Gitユーザー名 |
-| `GIT_USER_EMAIL` | Gitメールアドレス |
-| `ANTHROPIC_API_KEY` | Claude Code用APIキー |
-| `GOOGLE_API_KEY` | Gemini CLI用APIキー |
-
-### SSHエージェント転送
-
-秘密鍵はホストに残り、署名のみがコンテナに転送されます。`run.sh`がプラットフォームに応じたソケットパスを自動設定します。
-
-| プラットフォーム | 自動検出 |
-|------------------|----------|
-| Linux | ✓ |
-| macOS + Docker Desktop | ✓ |
-| macOS + Rancher Desktop | ✓ |
-
-## アンインストール
-
-```bash
-# mise設定から削除
-# ~/.config/mise/config.toml から # BEGIN claude-skills 〜 # END claude-skills を削除
-
-# リポジトリを削除（クローンした場所）
-rm -rf /path/to/skills
 ```
 
 ## ライセンス
