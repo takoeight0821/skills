@@ -17,5 +17,5 @@
 - **Standardized Headers:** For major scripts and Go packages, provide a brief header comment describing the file's purpose and any critical dependencies.
 
 ## Visual & CLI Identity
-- **CLI Output:** Ensure CLI tools (`mpvm`, scripts) provide clear, actionable feedback. Use standard output for information and standard error for issues.
+- **CLI Output:** Ensure CLI tools (`jig`, scripts) provide clear, actionable feedback. Use standard output for information and standard error for issues.
 - **Consistent Naming:** Use consistent naming conventions for `mise` tasks, environment variables, and CLI flags to ensure a predictable user experience.
