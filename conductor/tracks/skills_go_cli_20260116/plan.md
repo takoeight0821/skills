@@ -32,7 +32,7 @@ This plan outlines the steps to create a unified Go CLI `skills` to replace the 
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Docker Management' (Protocol in workflow.md) [commit: 981f267]
 
 ## Phase 5: Skill Synchronization [checkpoint: ]
-- [ ] Task: Create `sync` command.
+- [x] Task: Create `sync` command. [commit: 7da74cd]
 - [ ] Task: Implement skill synchronization logic (replacing shell sync scripts).
 - [ ] Task: Add flags for `--dry-run` and `--force`.
 - [ ] Task: Write tests for sync logic.
