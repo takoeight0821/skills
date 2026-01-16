@@ -8,7 +8,7 @@
     - [ ] Sub-task: Update `conductor/index.md` to include links to key existing docs (e.g., specific guides in `docs/`).
     - [ ] Sub-task: Ensure `CLAUDE.md` and `GEMINI.md` context files are synchronized with the new `conductor` structure where appropriate.
 
-## Phase 2: Tooling Verification
+## Phase 2: Tooling Verification [checkpoint: 6b140ae]
 - [x] Task: Verify `mise` task functionality. [commit: 15817c5]
     - [x] Sub-task: Run `mise tasks` - 19 tasks enumerated.
     - [x] Sub-task: Sync tasks skipped (replaced by Go CLI in new architecture).
