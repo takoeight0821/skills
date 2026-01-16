@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
+> **Project Context:** Please refer to [conductor/index.md](conductor/index.md) for the most up-to-date documentation, workflow, and architecture details.
+
 This repository manages Claude Code agent skills and provides a Multipass-based development environment for AI coding agents (Claude Code, Gemini CLI). Skills are synchronized to `~/.claude/skills` (global) or `.claude/skills` (project-level) using mise tasks.
 
 ## Prerequisites
