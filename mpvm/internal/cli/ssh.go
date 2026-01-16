@@ -47,6 +47,9 @@ func runSSH(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	// Get mount point for working directory
+	mountPoint := client.GetMountPoint(vmName, cwd)
+
 	// Build SSH command with agent forwarding
 	sshArgs := []string{
 		"-A", // Agent forwarding
@@ -55,15 +58,16 @@ func runSSH(cmd *cobra.Command, args []string) error {
 		fmt.Sprintf("ubuntu@%s", ip),
 	}
 
-	// Add custom TERM and disable focus reporting
+	// Add custom TERM/COLORTERM and disable focus reporting
 	term := getVMTerm()
+	colorterm := getColorTerm()
 
 	// Add any additional arguments or default shell
 	if len(args) > 0 {
 		sshArgs = append(sshArgs, args...)
 	} else {
-		// Disable focus reporting (\e[?1004l) and start bash
-		sshArgs = append(sshArgs, fmt.Sprintf("printf '\\e[?1004l'; TERM=%s exec bash -l", term))
+		// Disable focus reporting (\e[?1004l), set TERM/COLORTERM, cd to mount point, and start bash
+		sshArgs = append(sshArgs, fmt.Sprintf("printf '\\e[?1004l'; export TERM=%s COLORTERM=%s; cd '%s' && exec bash -l", term, colorterm, mountPoint))
 	}
 
 	sshPath, err := exec.LookPath("ssh")
