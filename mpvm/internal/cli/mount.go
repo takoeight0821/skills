@@ -27,8 +27,8 @@ var umountCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(mountCmd)
-	rootCmd.AddCommand(umountCmd)
+	vmCmd.AddCommand(mountCmd)
+	vmCmd.AddCommand(umountCmd)
 }
 
 func runMount(cmd *cobra.Command, args []string) error {

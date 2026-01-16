@@ -4,3 +4,7 @@
 # VM config files (use .sample as template)
 vm-settings.json
 vm-marketplaces.txt
+
+# Binaries
+bin/
+mpvm/bin/

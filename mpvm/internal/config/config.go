@@ -34,6 +34,7 @@ func getCacheHome() string {
 
 type Config struct {
 	VM     VMConfig     `toml:"vm"`
+	Docker DockerConfig `toml:"docker"`
 	Git    GitConfig    `toml:"git"`
 	SSH    SSHConfig    `toml:"ssh"`
 	Claude ClaudeConfig `toml:"claude"`
@@ -59,6 +60,13 @@ type ClaudeConfig struct {
 	Marketplaces []string `toml:"marketplaces"`
 }
 
+type DockerConfig struct {
+	ContainerName string `toml:"container_name"`
+	ImageName     string `toml:"image_name"`
+	CPUs          string `toml:"cpus"`
+	Memory        string `toml:"memory"`
+}
+
 func DefaultConfig() *Config {
 	home, _ := os.UserHomeDir()
 	return &Config{
@@ -78,11 +86,17 @@ func DefaultConfig() *Config {
 				"anthropics/skills",
 			},
 		},
+		Docker: DockerConfig{
+			ContainerName: "coding-agent-docker",
+			ImageName:     "coding-agent:latest",
+			CPUs:          "2",
+			Memory:        "4g",
+		},
 	}
 }
 
 func ConfigDir() string {
-	return filepath.Join(getConfigHome(), "mpvm")
+	return filepath.Join(getConfigHome(), "skills")
 }
 
 func ConfigPath() string {
@@ -90,11 +104,11 @@ func ConfigPath() string {
 }
 
 func StateDir() string {
-	return filepath.Join(getStateHome(), "mpvm")
+	return filepath.Join(getStateHome(), "skills")
 }
 
 func CacheDir() string {
-	return filepath.Join(getCacheHome(), "mpvm")
+	return filepath.Join(getCacheHome(), "skills")
 }
 
 func Load() (*Config, error) {

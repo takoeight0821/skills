@@ -12,7 +12,7 @@ var stopCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(stopCmd)
+	vmCmd.AddCommand(stopCmd)
 }
 
 func runStop(cmd *cobra.Command, args []string) error {

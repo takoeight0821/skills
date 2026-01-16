@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/takoeight0821/skills/mpvm/internal/git"
+	"github.com/takoeight0821/skills/skills-cli/internal/git"
 )
 
 var configureGitCmd = &cobra.Command{
@@ -14,7 +14,7 @@ This sets up git user name, email, and SSH signing key.`,
 }
 
 func init() {
-	rootCmd.AddCommand(configureGitCmd)
+	vmCmd.AddCommand(configureGitCmd)
 }
 
 func runConfigureGit(cmd *cobra.Command, args []string) error {

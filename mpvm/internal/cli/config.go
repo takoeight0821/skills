@@ -5,20 +5,20 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/takoeight0821/skills/mpvm/internal/config"
+	"github.com/takoeight0821/skills/skills-cli/internal/config"
 )
 
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage configuration",
-	Long:  `Manage mpvm configuration.`,
+	Long:  `Manage skills vm configuration.`,
 }
 
 var configInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize configuration file",
 	Long: `Create a default configuration file.
-The configuration file is created at ~/.config/mpvm/config.toml`,
+The configuration file is created at ~/.config/skills vm/config.toml`,
 	RunE: runConfigInit,
 }
 
@@ -86,6 +86,11 @@ func runConfigShow(cmd *cobra.Command, args []string) error {
 	fmt.Printf("  cpus = %d\n", cfg.VM.CPUs)
 	fmt.Printf("  memory = %q\n", cfg.VM.Memory)
 	fmt.Printf("  disk = %q\n", cfg.VM.Disk)
+	fmt.Printf("\n[docker]\n")
+	fmt.Printf("  container_name = %q\n", cfg.Docker.ContainerName)
+	fmt.Printf("  image_name = %q\n", cfg.Docker.ImageName)
+	fmt.Printf("  cpus = %q\n", cfg.Docker.CPUs)
+	fmt.Printf("  memory = %q\n", cfg.Docker.Memory)
 	fmt.Printf("\n[git]\n")
 	fmt.Printf("  user_name = %q\n", cfg.Git.UserName)
 	fmt.Printf("  user_email = %q\n", cfg.Git.UserEmail)

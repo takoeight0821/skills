@@ -1,4 +1,4 @@
-module github.com/takoeight0821/skills/mpvm
+module github.com/takoeight0821/skills/skills-cli
 
 go 1.22
 

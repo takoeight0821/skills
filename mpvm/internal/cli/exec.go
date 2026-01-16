@@ -12,17 +12,17 @@ var execCmd = &cobra.Command{
 	Use:   "exec [command...]",
 	Short: "Execute command in VM",
 	Long: `Execute an arbitrary command inside the VM.
-Use -- to separate mpvm flags from the command to execute.
+Use -- to separate skills vm flags from the command to execute.
 
 Example:
-  mpvm exec -- ls -la
-  mpvm exec -- bash -c "echo hello"`,
+  skills vm exec -- ls -la
+  skills vm exec -- bash -c "echo hello"`,
 	RunE:               runExec,
 	DisableFlagParsing: true,
 }
 
 func init() {
-	rootCmd.AddCommand(execCmd)
+	vmCmd.AddCommand(execCmd)
 }
 
 func runExec(cmd *cobra.Command, args []string) error {

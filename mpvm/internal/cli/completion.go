@@ -9,17 +9,17 @@ import (
 var completionCmd = &cobra.Command{
 	Use:   "completion [bash|zsh|fish|powershell]",
 	Short: "Generate shell completion script",
-	Long: `Generate shell completion script for mpvm.
+	Long: `Generate shell completion script for skills vm.
 
 To load completions:
 
 Bash:
-  $ source <(mpvm completion bash)
+  $ source <(skills vm completion bash)
   # To load completions for each session, execute once:
   # Linux:
-  $ mpvm completion bash > /etc/bash_completion.d/mpvm
+  $ skills vm completion bash > /etc/bash_completion.d/skills vm
   # macOS:
-  $ mpvm completion bash > $(brew --prefix)/etc/bash_completion.d/mpvm
+  $ skills vm completion bash > $(brew --prefix)/etc/bash_completion.d/skills vm
 
 Zsh:
   # If shell completion is not already enabled in your environment,
@@ -27,18 +27,18 @@ Zsh:
   $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
   # To load completions for each session, execute once:
-  $ mpvm completion zsh > "${fpath[1]}/_mpvm"
+  $ skills vm completion zsh > "${fpath[1]}/_skills vm"
   # You will need to start a new shell for this setup to take effect.
 
 Fish:
-  $ mpvm completion fish | source
+  $ skills vm completion fish | source
   # To load completions for each session, execute once:
-  $ mpvm completion fish > ~/.config/fish/completions/mpvm.fish
+  $ skills vm completion fish > ~/.config/fish/completions/skills vm.fish
 
 PowerShell:
-  PS> mpvm completion powershell | Out-String | Invoke-Expression
+  PS> skills vm completion powershell | Out-String | Invoke-Expression
   # To load completions for every new session, run:
-  PS> mpvm completion powershell > mpvm.ps1
+  PS> skills vm completion powershell > skills vm.ps1
   # and source this file from your PowerShell profile.
 `,
 	DisableFlagsInUseLine: true,

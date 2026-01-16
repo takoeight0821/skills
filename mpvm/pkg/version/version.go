@@ -13,7 +13,7 @@ var (
 )
 
 func Info() string {
-	return fmt.Sprintf("mpvm %s (commit: %s, built: %s, go: %s)",
+	return fmt.Sprintf("skills %s (commit: %s, built: %s, go: %s)",
 		Version, Commit, Date, runtime.Version())
 }
 

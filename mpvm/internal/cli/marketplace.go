@@ -20,7 +20,7 @@ If no marketplace is specified, adds all marketplaces from config.`,
 
 func init() {
 	marketplaceCmd.AddCommand(marketplaceAddCmd)
-	rootCmd.AddCommand(marketplaceCmd)
+	vmCmd.AddCommand(marketplaceCmd)
 }
 
 func runMarketplaceAdd(cmd *cobra.Command, args []string) error {

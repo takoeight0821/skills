@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/takoeight0821/skills/mpvm/internal/config"
-	"github.com/takoeight0821/skills/mpvm/internal/logging"
-	"github.com/takoeight0821/skills/mpvm/internal/multipass"
-	"github.com/takoeight0821/skills/mpvm/pkg/version"
+	"github.com/takoeight0821/skills/skills-cli/internal/config"
+	"github.com/takoeight0821/skills/skills-cli/internal/logging"
+	"github.com/takoeight0821/skills/skills-cli/internal/multipass"
+	"github.com/takoeight0821/skills/skills-cli/pkg/version"
 )
 
 var (
@@ -20,10 +20,11 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "mpvm",
-	Short: "Multipass VM manager for coding agents",
-	Long: `mpvm manages Multipass VMs configured for Claude Code and Gemini CLI.
-Supports SSH Agent Forwarding for secure git commit signing.`,
+	Use:   "skills",
+	Short: "Unified CLI for coding agent environments",
+	Long: `skills manages VM and container environments for coding agents.
+Supports Multipass VMs and Docker containers for Claude Code and Gemini CLI.
+Features SSH Agent Forwarding for secure git commit signing.`,
 	Version: version.Short(),
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		var err error
@@ -38,12 +39,6 @@ Supports SSH Agent Forwarding for secure git commit signing.`,
 		}
 
 		log = logging.Default()
-		client = multipass.NewClient()
-
-		// Check if multipass is installed
-		if !client.IsInstalled() {
-			return fmt.Errorf("multipass is not installed. Please install it from https://multipass.run")
-		}
 
 		return nil
 	},
@@ -60,6 +55,15 @@ func init() {
 	rootCmd.SetVersionTemplate("{{.Version}}\n")
 }
 
+// initVMClient initializes the multipass client for VM commands
+func initVMClient() error {
+	client = multipass.NewClient()
+	if !client.IsInstalled() {
+		return fmt.Errorf("multipass is not installed. Please install it from https://multipass.run")
+	}
+	return nil
+}
+
 func getVMName() string {
 	if cfg != nil && cfg.VM.Name != "" {
 		return cfg.VM.Name
@@ -73,7 +77,7 @@ func checkVMExists() error {
 		return err
 	}
 	if !exists {
-		return fmt.Errorf("VM '%s' does not exist. Run 'mpvm launch' to create it", getVMName())
+		return fmt.Errorf("VM '%s' does not exist. Run 'skills vm launch' to create it", getVMName())
 	}
 	return nil
 }
@@ -88,7 +92,7 @@ func checkVMRunning() error {
 		return err
 	}
 	if !running {
-		return fmt.Errorf("VM '%s' is not running. Run 'mpvm start' to start it", getVMName())
+		return fmt.Errorf("VM '%s' is not running. Run 'skills vm start' to start it", getVMName())
 	}
 	return nil
 }

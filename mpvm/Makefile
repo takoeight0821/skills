@@ -1,20 +1,20 @@
-BINARY_NAME=mpvm
+BINARY_NAME=skills
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
 DATE ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 LDFLAGS=-ldflags "-s -w \
-    -X github.com/takoeight0821/skills/mpvm/pkg/version.Version=$(VERSION) \
-    -X github.com/takoeight0821/skills/mpvm/pkg/version.Commit=$(COMMIT) \
-    -X github.com/takoeight0821/skills/mpvm/pkg/version.Date=$(DATE)"
+    -X github.com/takoeight0821/skills/skills-cli/pkg/version.Version=$(VERSION) \
+    -X github.com/takoeight0821/skills/skills-cli/pkg/version.Commit=$(COMMIT) \
+    -X github.com/takoeight0821/skills/skills-cli/pkg/version.Date=$(DATE)"
 
 .PHONY: build
 build:
-	go build $(LDFLAGS) -o bin/$(BINARY_NAME) ./cmd/mpvm
+	go build $(LDFLAGS) -o bin/$(BINARY_NAME) ./cmd/skills
 
 .PHONY: install
 install:
-	go install $(LDFLAGS) ./cmd/mpvm
+	go install $(LDFLAGS) ./cmd/skills
 
 .PHONY: test
 test:
