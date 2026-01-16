@@ -19,6 +19,7 @@
     - [x] Sub-task: `docker build` - `coding-agent` image built successfully.
 
 ## Phase 3: Finalization
-- [ ] Task: Update `README.md` with any new findings or structure changes.
-    - [ ] Sub-task: Refine the "Usage" section based on verification steps.
+- [x] Task: Update `README.md` with any new findings or structure changes. [commit: 5850233]
+    - [x] Sub-task: Added mpvm CLI section as recommended approach.
+    - [x] Sub-task: Updated prerequisites (Multipass, Go 1.22+).
 - [ ] Task: Conductor - User Manual Verification 'Finalization' (Protocol in workflow.md)
