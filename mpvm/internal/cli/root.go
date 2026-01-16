@@ -106,3 +106,11 @@ func getVMTerm() string {
 		return term
 	}
 }
+
+func getColorTerm() string {
+	colorterm := os.Getenv("COLORTERM")
+	if colorterm == "" {
+		return "truecolor"
+	}
+	return colorterm
+}

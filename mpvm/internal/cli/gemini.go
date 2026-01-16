@@ -47,6 +47,7 @@ func runGemini(cmd *cobra.Command, args []string) error {
 
 	// Build SSH command
 	term := getVMTerm()
+	colorterm := getColorTerm()
 	geminiArgs := []string{"gemini"}
 	geminiArgs = append(geminiArgs, args...)
 
@@ -55,7 +56,8 @@ func runGemini(cmd *cobra.Command, args []string) error {
 		"-t",
 		"-o", "StrictHostKeyChecking=accept-new",
 		fmt.Sprintf("ubuntu@%s", ip),
-		fmt.Sprintf("printf '\\e[?1004l'; cd %s && TERM=%s %s", mountPoint, term, joinArgs(geminiArgs)),
+		// Use bash -i to load .bashrc (for mise and other shell configurations)
+		fmt.Sprintf("printf '\\e[?1004l'; bash -i -c 'export TERM=%s COLORTERM=%s; cd \"%s\" && %s'", term, colorterm, mountPoint, joinArgs(geminiArgs)),
 	}
 
 	sshPath, _ := exec.LookPath("ssh")
