@@ -1,8 +1,8 @@
 # Technology Stack
 
 ## Core Technologies
-- **Go:** Used for building the \`mpvm\` CLI tool, providing a performant and statically typed language for system-level operations.
-- **Shell (Bash/POSIX):** Used for synchronization scripts, installation routines, and environment setup, ensuring high portability across Unix-like systems.
+- **Go:** Used for building the unified `skills` CLI tool, providing a performant and statically typed language for system-level operations and synchronization logic.
+- **Shell (Bash/POSIX):** Used for installation routines and legacy environment setup. Synchronization logic is primarily handled by the Go CLI.
 - **Node.js:** The primary runtime for the AI agents (Claude Code, Gemini CLI).
 
 ## Infrastructure & Environment
