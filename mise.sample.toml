@@ -4,60 +4,90 @@
 # Or run: ./install.sh
 #
 # All sync tasks run in dry-run mode by default.
-# Use *-apply tasks or set apply=true in config file to actually sync.
-
-[tasks."tk:update-shared-skills"]
-description = "Update shared Claude skills repository"
-run = """
-SKILLS_REPO="${SKILLS_REPO:-https://github.com/takoeight0821/skills.git}"
-SKILLS_DIR="${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}"
-
-if [ -d "$SKILLS_DIR" ]; then
-  echo "Updating skills repository..."
-  git -C "$SKILLS_DIR" pull --quiet
-else
-  echo "Cloning skills repository..."
-  git clone "$SKILLS_REPO" "$SKILLS_DIR"
-fi
-echo "Done."
-"""
+# Use *-apply tasks to actually sync.
 
 # Global sync tasks (dry-run by default)
 [tasks."tk:sync-skills-global"]
 description = "Preview sync to ~/.claude/skills (dry-run)"
-run = """
-"${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --global "$@"
-"""
+run = "skills sync --global --dry-run \"$@\""
 
 [tasks."tk:sync-skills-global-apply"]
 description = "Sync shared skills to ~/.claude/skills"
-run = """
-"${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --global --apply "$@"
-"""
+run = "skills sync --global --apply \"$@\""
 
 # Project sync tasks (dry-run by default)
 [tasks."tk:sync-skills-project"]
 description = "Preview sync to .claude/skills (dry-run)"
-run = """
-"${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --project "$@"
-"""
+run = "skills sync --project --dry-run \"$@\""
 
 [tasks."tk:sync-skills-project-apply"]
 description = "Sync shared skills to .claude/skills"
-run = """
-"${SKILLS_SHARED_DIR:-$HOME/.local/share/skills}/bin/sync-skills.sh" --project --apply "$@"
-"""
-
-# Optional: Auto-sync on entering a project directory
-# Uncomment to enable (uses dry-run by default, set apply=true in config for auto-apply)
-# [hooks]
-# enter = "mise run tk:sync-skills-project 2>/dev/null || true"
+run = "skills sync --project --apply \"$@\""
 
 # =============================================================================
 # Multipass development environment tasks
 # =============================================================================
-# Multipass tasks (vm-launch, vm-ssh, vm-claude, etc.)
-# are installed via ./install.sh to ~/.config/mise/config.toml
-#
-# Run: ./install.sh
-#
+
+[tasks."tk:vm-launch"]
+description = "Create and start the coding agent VM"
+run = "skills vm launch \"$@\""
+
+[tasks."tk:vm-start"]
+description = "Start the coding agent VM"
+run = "skills vm start \"$@\""
+
+[tasks."tk:vm-stop"]
+description = "Stop the coding agent VM"
+run = "skills vm stop \"$@\""
+
+[tasks."tk:vm-delete"]
+description = "Delete the coding agent VM"
+run = "skills vm delete \"$@\""
+
+[tasks."tk:vm-ssh"]
+description = "SSH into the VM with agent forwarding"
+run = "skills vm ssh \"$@\""
+
+[tasks."tk:vm-claude"]
+description = "Run Claude Code in the VM"
+run = "skills vm claude \"$@\""
+
+[tasks."tk:vm-gemini"]
+description = "Run Gemini CLI in the VM"
+run = "skills vm gemini \"$@\""
+
+[tasks."tk:vm-status"]
+description = "Show VM status"
+run = "skills vm status \"$@\""
+
+# =============================================================================
+# Docker development environment tasks
+# =============================================================================
+
+[tasks."tk:docker-launch"]
+description = "Build and start the coding agent container"
+run = "skills docker launch \"$@\""
+
+[tasks."tk:docker-start"]
+description = "Start the coding agent container"
+run = "skills docker start \"$@\""
+
+[tasks."tk:docker-stop"]
+description = "Stop the coding agent container"
+run = "skills docker stop \"$@\""
+
+[tasks."tk:docker-delete"]
+description = "Delete the coding agent container"
+run = "skills docker delete \"$@\""
+
+[tasks."tk:docker-ssh"]
+description = "Interactive shell in container"
+run = "skills docker ssh \"$@\""
+
+[tasks."tk:docker-claude"]
+description = "Run Claude Code in container"
+run = "skills docker claude \"$@\""
+
+[tasks."tk:docker-gemini"]
+description = "Run Gemini CLI in container"
+run = "skills docker gemini \"$@\""

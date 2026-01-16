@@ -1,9 +1,10 @@
-# mpvm - Multipass VM Manager
+# skills - Unified CLI for Coding Agent Environments
 
-A single-binary CLI tool for managing Multipass VMs configured for AI coding agents (Claude Code, Gemini CLI).
+A single-binary CLI tool for managing Multipass VMs and Docker containers configured for AI coding agents (Claude Code, Gemini CLI).
 
 ## Features
 
+- **Unified CLI** - One tool for both VMs and containers
 - Single binary with embedded cloud-init configuration
 - XDG Base Directory specification compliant
 - SSH Agent Forwarding for secure git commit signing
@@ -16,15 +17,15 @@ A single-binary CLI tool for managing Multipass VMs configured for AI coding age
 ### go install (Recommended)
 
 ```bash
-go install github.com/takoeight0821/skills/mpvm/cmd/mpvm@latest
+go install github.com/takoeight0821/skills/skills-cli/cmd/skills@latest
 ```
 
 ### From Source
 
 ```bash
 git clone https://github.com/takoeight0821/skills.git
-cd skills
-go install -C mpvm ./cmd/mpvm
+cd skills/mpvm
+make install
 ```
 
 ### Build Locally
@@ -32,37 +33,61 @@ go install -C mpvm ./cmd/mpvm
 ```bash
 cd mpvm
 make build
-./bin/mpvm --help
+./bin/skills --help
 ```
 
 ## Quick Start
 
+### VM (Multipass)
+
 ```bash
 # Initialize configuration
-mpvm config init
+skills config init
 
 # Create and start VM
-mpvm launch
+skills vm launch
 
 # SSH into VM
-mpvm ssh
+skills vm ssh
 
-# Run Claude Code (First time will start authentication flow)
-mpvm claude
+# Run Claude Code
+skills vm claude
 
 # Run Gemini CLI
-mpvm gemini
+skills vm gemini
 
 # Stop VM
-mpvm stop
+skills vm stop
 
 # Delete VM
-mpvm delete
+skills vm delete
+```
+
+### Docker
+
+```bash
+# Build image and start container
+skills docker launch
+
+# Interactive shell
+skills docker ssh
+
+# Run Claude Code
+skills docker claude
+
+# Run Gemini CLI
+skills docker gemini
+
+# Stop container
+skills docker stop
+
+# Delete container and image
+skills docker delete
 ```
 
 ## Configuration
 
-Configuration is stored at `~/.config/mpvm/config.toml` on all platforms.
+Configuration is stored at `~/.config/skills/config.toml` on all platforms.
 
 ### Example Configuration
 
@@ -72,6 +97,12 @@ name = "coding-agent"
 cpus = 2
 memory = "4G"
 disk = "20G"
+
+[docker]
+container_name = "coding-agent-docker"
+image_name = "coding-agent:latest"
+cpus = "2"
+memory = "4g"
 
 [git]
 user_name = "Your Name"
@@ -89,42 +120,76 @@ marketplaces = [
 
 ## Commands
 
+### VM Commands (Multipass)
+
 | Command | Description |
 |---------|-------------|
-| `mpvm launch` | Create and start VM with cloud-init |
-| `mpvm start` | Start stopped VM |
-| `mpvm stop` | Stop running VM |
-| `mpvm delete` | Delete VM (with confirmation) |
-| `mpvm ssh` | SSH into VM with agent forwarding |
-| `mpvm claude` | Run Claude Code in VM |
-| `mpvm gemini` | Run Gemini CLI in VM |
-| `mpvm exec <cmd>` | Execute arbitrary command in VM |
-| `mpvm mount [path]` | Mount directory to VM |
-| `mpvm umount [path]` | Unmount directory from VM |
-| `mpvm status` | Show VM status |
-| `mpvm logs` | Show cloud-init logs |
-| `mpvm configure-git` | Re-configure git in VM |
-| `mpvm config init` | Initialize configuration file |
-| `mpvm config show` | Show current configuration |
-| `mpvm completion` | Generate shell completion |
+| `skills vm launch` | Create and start VM with cloud-init |
+| `skills vm start` | Start stopped VM |
+| `skills vm stop` | Stop running VM |
+| `skills vm delete` | Delete VM (with confirmation) |
+| `skills vm ssh` | SSH into VM with agent forwarding |
+| `skills vm claude` | Run Claude Code in VM |
+| `skills vm gemini` | Run Gemini CLI in VM |
+| `skills vm exec <cmd>` | Execute arbitrary command in VM |
+| `skills vm mount [path]` | Mount directory to VM |
+| `skills vm umount [path]` | Unmount directory from VM |
+| `skills vm status` | Show VM status |
+| `skills vm logs` | Show cloud-init logs |
+| `skills vm configure-git` | Re-configure git in VM |
+
+### Docker Commands
+
+| Command | Description |
+|---------|-------------|
+| `skills docker launch` | Build image and start container |
+| `skills docker start` | Start existing container |
+| `skills docker stop` | Stop container |
+| `skills docker delete` | Delete container, image, and volume |
+| `skills docker ssh` | Interactive shell in container |
+| `skills docker claude` | Run Claude Code in container |
+| `skills docker gemini` | Run Gemini CLI in container |
+| `skills docker status` | Show container status |
+| `skills docker logs` | Show container logs |
+| `skills docker configure-git` | Re-configure git in container |
+
+### Sync Commands
+
+| Command | Description |
+|---------|-------------|
+| `skills sync --global` | Sync skills to ~/.claude/skills |
+| `skills sync --project` | Sync skills to .claude/skills |
+| `skills sync --dry-run` | Preview changes without applying |
+| `skills sync --force` | Overwrite existing files |
+| `skills sync --source <path>` | Specify custom source directory |
+
+### Config Commands
+
+| Command | Description |
+|---------|-------------|
+| `skills config init` | Initialize configuration file |
+| `skills config show` | Show current configuration |
+| `skills config path` | Show configuration file path |
+| `skills completion` | Generate shell completion |
 
 ## Shell Completion
 
 ```bash
 # Bash
-source <(mpvm completion bash)
+source <(skills completion bash)
 
 # Zsh
-mpvm completion zsh > "${fpath[1]}/_mpvm"
+skills completion zsh > "${fpath[1]}/_skills"
 
 # Fish
-mpvm completion fish | source
+skills completion fish | source
 ```
 
 ## Requirements
 
-- [Multipass](https://multipass.run/) installed
-- SSH key for authentication and git signing (default: `~/.ssh/id_ed25519.pub` or `~/.ssh/id_rsa.pub`)
+- [Multipass](https://multipass.run/) for VM commands
+- [Docker](https://www.docker.com/products/docker-desktop/) for container commands
+- SSH key for authentication and git signing
 
 ## Development
 
@@ -134,18 +199,12 @@ mpvm completion fish | source
 
 ### Build and Test
 ```bash
-# Run unit tests
-make test
-
-# Build binary
-make build
-
-# Install locally
-make install
+make test    # Run unit tests
+make build   # Build binary
+make install # Install locally
 ```
 
 ### Linting
 ```bash
 make lint
 ```
-
