@@ -7,7 +7,7 @@
 
 | File Path | Purpose | Status | Action Required |
 |-----------|---------|--------|-----------------|
-| `README.md` | Main project entry point. Covers installation, usage, and architecture of the skills repo and `mpvm`. | Active | Update to reflect new `conductor` structure and any recent changes. |
+| `README.md` | Main project entry point. Covers installation, usage, and architecture of the skills repo and `jig`. | Active | Update to reflect new `conductor` structure and any recent changes. |
 | `CLAUDE.md` | Context file for Claude Code. Contains project-specific instructions and skills. | Active | Update to reference `conductor/index.md` as the source of truth for project context. |
 | `GEMINI.md` | Context file for Gemini CLI. Contains project-specific instructions. | Active | Update to reference `conductor/index.md` as the source of truth for project context. |
 | `conductor/index.md` | New project context index. | New | Populate with links to consolidated documentation. |

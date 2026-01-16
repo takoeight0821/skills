@@ -12,14 +12,14 @@
 - [x] Task: Verify `mise` task functionality. [commit: 15817c5]
     - [x] Sub-task: Run `mise tasks` - 19 tasks enumerated.
     - [x] Sub-task: Sync tasks skipped (replaced by Go CLI in new architecture).
-- [x] Task: Verify `mpvm` build. [commit: 15817c5]
-    - [x] Sub-task: `go install ./cmd/mpvm` - compiles successfully.
+- [x] Task: Verify `jig` build. [commit: 15817c5]
+    - [x] Sub-task: `go install ./cmd/jig` - compiles successfully.
     - [x] Sub-task: `go test -v -race -cover ./...` - 24 tests pass, 49.1% coverage.
 - [x] Task: Verify Docker setup (dry-run/build only). [commit: 15817c5]
     - [x] Sub-task: `docker build` - `coding-agent` image built successfully.
 
 ## Phase 3: Finalization [checkpoint: 5e43436]
 - [x] Task: Update `README.md` with any new findings or structure changes. [commit: 5850233]
-    - [x] Sub-task: Added mpvm CLI section as recommended approach.
+    - [x] Sub-task: Added jig CLI section as recommended approach.
     - [x] Sub-task: Updated prerequisites (Multipass, Go 1.22+).
 - [x] Task: Conductor - User Manual Verification 'Finalization' (Protocol in workflow.md) [commit: 5e43436]

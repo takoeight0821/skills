@@ -18,7 +18,7 @@ VM管理、コンテナ管理、スキル同期を統合したGo製のCLIツー�
 
 ```bash
 # Goを使ってインストール
-go install github.com/takoeight0821/skills/mpvm/cmd/skills@latest
+go install github.com/takoeight0821/skills/jig/cmd/skills@latest
 ```
 
 ### クイックスタート
@@ -37,7 +37,7 @@ skills sync --global --apply
 skills vm claude
 ```
 
-詳細は [mpvm/README.md](mpvm/README.md) を参照してください。
+詳細は [jig/README.md](jig/README.md) を参照してください。
 
 ## 使い方
 
@@ -91,7 +91,7 @@ skills docker stop     # 停止
 │   └── my-skill/
 │       ├── SKILL.md
 │       └── ...
-├── mpvm/                       # skills CLIのソースコード
+├── jig/                        # skills CLIのソースコード
 │   ├── cmd/skills/             # エントリポイント
 │   └── ...
 ├── docker/                     # Docker関連ファイル

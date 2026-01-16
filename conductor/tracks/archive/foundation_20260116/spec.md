@@ -10,11 +10,11 @@ To organize the existing project structure, consolidate documentation, and verif
     - Ensure `install.sh` usage and `mise` task descriptions are clear and up-to-date in the main documentation.
 - **Verification:**
     - Verify all `mise` tasks listed in `mise.toml` and `mise.sample.toml` function as expected (dry-run where applicable).
-    - Ensure `mpvm` build process works.
+    - Ensure `jig` build process works.
     - Validate Docker build commands.
 
 ## Out of Scope
-- Adding new features to `mpvm` or the sync logic.
+- Adding new features to `jig` or the sync logic.
 - Major refactoring of the Go codebase (unless critical bugs are found during verification).
 
 ## Success Criteria
