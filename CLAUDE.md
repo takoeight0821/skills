@@ -17,11 +17,13 @@ This repository manages Claude Code agent skills and provides a Multipass-based 
 ## Common Commands
 
 ### Installation and Setup
+
 ```bash
 ./install.sh                    # Install mise tasks to ~/.config/mise/config.toml
 ```
 
 ### Multipass Development Environment
+
 ```bash
 mise run tk:vm-launch              # Create and start VM with cloud-init
 mise run tk:vm-start               # Start existing VM
@@ -41,6 +43,7 @@ mise run tk:vm-mount <path>        # Mount directory to VM
 ```
 
 ### Skills Sync (when using the sync feature)
+
 ```bash
 mise run tk:update-shared-skills         # Pull latest from remote
 mise run tk:sync-skills-global           # Preview global sync (dry-run)
@@ -52,6 +55,7 @@ mise run tk:sync-skills-project-apply    # Apply project sync
 ## Architecture
 
 ### Directory Structure
+
 - `skills/` - Shareable Claude Code skills (SKILL.md files)
 - `multipass/` - Multipass VM environment for coding agents
   - `cloud-init.yaml` - VM initialization (Ubuntu 24.04, Node.js, Claude Code, Gemini CLI)
@@ -62,13 +66,16 @@ mise run tk:sync-skills-project-apply    # Apply project sync
 - `install.sh` - Adds mise tasks to global config
 
 ### Sync System
+
 Skills are synchronized via `bin/sync-skills.sh` (referenced in mise.sample.toml):
+
 - Default mode is dry-run; use `--apply` or `*-apply` tasks to execute
 - Tracking via `.skills-manifest` files
 - Options: `--force` (overwrite), `--prune` (remove deleted), `--exclude` (git exclude)
 - Config files: `~/.config/skills/config` (global), `.claude/.skills.conf` (project)
 
 ### Multipass VM Features
+
 - **SSH Agent Forwarding**: Secure git commit signing without copying private keys
 - **cloud-init**: Automatic VM configuration at launch
 - **Git SSH Signing**: Pre-configured for GitHub Verified commits
@@ -77,6 +84,7 @@ Skills are synchronized via `bin/sync-skills.sh` (referenced in mise.sample.toml
 ## Adding New Skills
 
 Create a directory under `skills/` with a `SKILL.md` file:
+
 ```bash
 mkdir -p skills/my-skill
 # Create skills/my-skill/SKILL.md with YAML frontmatter (name, description) and skill content
@@ -88,10 +96,10 @@ Skill files use YAML frontmatter for metadata (name, description) followed by ma
 
 Configuration is loaded from these files (later overrides earlier):
 
-| Priority | File | Description |
-|----------|------|-------------|
-| 1 (low) | `~/.config/skills/config` | Global configuration |
-| 2 (high) | `.skills.conf` | Project configuration (current directory) |
+| Priority | File                      | Description                               |
+| -------- | ------------------------- | ----------------------------------------- |
+| 1 (low)  | `~/.config/skills/config` | Global configuration                      |
+| 2 (high) | `.skills.conf`            | Project configuration (current directory) |
 
 ### Setup
 
@@ -127,3 +135,7 @@ To use a different VM per project, create `.skills.conf` in the project director
 # In your project directory
 echo 'MULTIPASS_VM_NAME=my-project-vm' > .skills.conf
 ```
+
+## Hints
+
+- Use `Write` or `WriteFile` tools to create or modify files. Do not edit files by `echo` or `cat`.
