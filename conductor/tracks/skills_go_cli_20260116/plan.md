@@ -38,8 +38,8 @@ This plan outlines the steps to create a unified Go CLI `skills` to replace the 
 - [x] Task: Write tests for sync logic. [commit: 88c36e0]
 - [x] Task: Conductor - User Manual Verification 'Phase 5: Skill Synchronization' (Protocol in workflow.md) [commit: 88c36e0]
 
-## Phase 6: Final Integration & Cleanup [checkpoint: ]
-- [ ] Task: Update project documentation to point to the new CLI.
-- [ ] Task: (Optional) Add `mise` tasks that wrap the new `skills` CLI for backward compatibility during transition.
-- [ ] Task: Final end-to-end verification.
-- [ ] Task: Conductor - User Manual Verification 'Phase 6: Final Integration' (Protocol in workflow.md)
+## Phase 6: Final Integration & Cleanup [checkpoint: 9775273]
+- [x] Task: Update project documentation to point to the new CLI. [commit: 9775273]
+- [x] Task: (Optional) Add `mise` tasks that wrap the new `skills` CLI for backward compatibility during transition. [commit: 9775273]
+- [x] Task: Final end-to-end verification. [commit: 9775273]
+- [x] Task: Conductor - User Manual Verification 'Phase 6: Final Integration' (Protocol in workflow.md) [commit: 9775273]
