@@ -4,9 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/takoeight0821/skills/mpvm/internal/config"
-	"github.com/takoeight0821/skills/mpvm/internal/logging"
-	"github.com/takoeight0821/skills/mpvm/internal/multipass"
+	"github.com/takoeight0821/skills/skills-cli/internal/config"
+	"github.com/takoeight0821/skills/skills-cli/internal/logging"
+	"github.com/takoeight0821/skills/skills-cli/internal/multipass"
 )
 
 func TestStatus_Running(t *testing.T) {

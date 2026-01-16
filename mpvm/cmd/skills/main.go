@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/takoeight0821/skills/mpvm/internal/cli"
+	"github.com/takoeight0821/skills/skills-cli/internal/cli"
 )
 
 func main() {

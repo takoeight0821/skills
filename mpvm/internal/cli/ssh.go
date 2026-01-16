@@ -18,7 +18,7 @@ This allows you to use your local SSH keys for git operations inside the VM.`,
 }
 
 func init() {
-	rootCmd.AddCommand(sshCmd)
+	vmCmd.AddCommand(sshCmd)
 }
 
 func runSSH(cmd *cobra.Command, args []string) error {

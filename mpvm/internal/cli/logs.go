@@ -21,7 +21,7 @@ var logsCmd = &cobra.Command{
 func init() {
 	logsCmd.Flags().IntVarP(&logsLines, "lines", "l", 100, "Number of lines to show")
 	logsCmd.Flags().BoolVarP(&logsFollow, "follow", "f", false, "Follow log output")
-	rootCmd.AddCommand(logsCmd)
+	vmCmd.AddCommand(logsCmd)
 }
 
 func runLogs(cmd *cobra.Command, args []string) error {

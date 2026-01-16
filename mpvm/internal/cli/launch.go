@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/takoeight0821/skills/mpvm/internal/cloudinit"
-	"github.com/takoeight0821/skills/mpvm/internal/git"
-	"github.com/takoeight0821/skills/mpvm/internal/multipass"
+	"github.com/takoeight0821/skills/skills-cli/internal/cloudinit"
+	"github.com/takoeight0821/skills/skills-cli/internal/git"
+	"github.com/takoeight0821/skills/skills-cli/internal/multipass"
 )
 
 var launchCmd = &cobra.Command{
@@ -23,7 +23,7 @@ If the VM already exists, it will be started instead.`,
 }
 
 func init() {
-	rootCmd.AddCommand(launchCmd)
+	vmCmd.AddCommand(launchCmd)
 }
 
 func runLaunch(cmd *cobra.Command, args []string) error {
@@ -113,9 +113,9 @@ func runLaunch(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println()
 	fmt.Println("Or use:")
-	fmt.Println("  mpvm ssh      # Interactive shell")
-	fmt.Println("  mpvm claude   # Run Claude Code")
-	fmt.Println("  mpvm gemini   # Run Gemini CLI")
+	fmt.Println("  skills vm ssh      # Interactive shell")
+	fmt.Println("  skills vm claude   # Run Claude Code")
+	fmt.Println("  skills vm gemini   # Run Gemini CLI")
 
 	return nil
 }
@@ -134,7 +134,7 @@ func setupClaude(vmName string) error {
 		return fmt.Errorf("failed to write Claude settings: %w", err)
 	}
 
-	log.Info("Claude settings configured. Run 'mpvm claude' to authenticate.")
+	log.Info("Claude settings configured. Run 'skills vm claude' to authenticate.")
 	return nil
 }
 

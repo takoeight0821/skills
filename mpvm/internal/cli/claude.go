@@ -18,7 +18,7 @@ The current directory will be automatically mounted and used as the working dire
 }
 
 func init() {
-	rootCmd.AddCommand(claudeCmd)
+	vmCmd.AddCommand(claudeCmd)
 }
 
 func runClaude(cmd *cobra.Command, args []string) error {
