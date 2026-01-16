@@ -6,6 +6,28 @@ Claude Codeのagent skillを管理する共用リポジトリです。miseを使
 
 - [mise](https://mise.jdx.dev/) がインストールされていること
 - Git
+- [Multipass](https://multipass.run/) - VM管理の場合
+- Go 1.22+ - mpvm CLIのインストールに必要
+
+## mpvm CLI（推奨）
+
+Multipass VM管理には、Goで書かれた`mpvm` CLIを使用することを推奨します：
+
+```bash
+# インストール
+go install github.com/takoeight0821/skills/mpvm/cmd/mpvm@latest
+
+# VM作成・起動
+mpvm launch
+
+# Claude Code実行
+mpvm claude
+
+# Gemini CLI実行
+mpvm gemini
+```
+
+詳細は [mpvm/README.md](mpvm/README.md) を参照してください。
 
 ## インストール
 
