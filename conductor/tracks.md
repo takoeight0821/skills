@@ -4,5 +4,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Project Foundation**
+- [x] **Track: Project Foundation**
   *Link: [./tracks/foundation_20260116/](./tracks/foundation_20260116/)*
+
+---
+
+- [ ] **Track: miseで作っているコマンドを、goのcliに置き換えてください。**
+*Link: [./tracks/skills_go_cli_20260116/](./tracks/skills_go_cli_20260116/)*
