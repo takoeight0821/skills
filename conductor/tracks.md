@@ -9,5 +9,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: miseで作っているコマンドを、goのcliに置き換えてください。**
-*Link: [./tracks/skills_go_cli_20260116/](./tracks/skills_go_cli_20260116/)*
+- [x] **Track: miseで作っているコマンドを、goのcliに置き換えてください。** *(archived)*
+  *Link: [./archive/skills_go_cli_20260116/](./archive/skills_go_cli_20260116/)*
