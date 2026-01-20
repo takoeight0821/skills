@@ -4,7 +4,7 @@
 - [x] Task: Define Remote Source Handler interface and GitHub implementation 2073a4f
     - [ ] Create interface for fetching remote manifests (`plugin.json`, `marketplace.json`, `gemini.json`)
     - [ ] Implement GitHub-specific fetcher using `git` CLI (to leverage local credentials)
-- [ ] Task: Implement Auto-Detection logic for Claude Plugins and Gemini Extensions
+- [~] Task: Implement Auto-Detection logic for Claude Plugins and Gemini Extensions
     - [ ] Add logic to distinguish between Claude and Gemini based on manifest files
     - [ ] Create unit tests for various repo structures (Claude-only, Gemini-only, Mixed)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Infrastructure & Discovery' (Protocol in workflow.md)
