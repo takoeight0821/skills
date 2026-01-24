@@ -8,14 +8,7 @@ Claude Code Plugin: 研究・開発向けスキルコレクション
 
 ## インストール
 
-Claude Codeでこのプラグインを使用するには：
-
-```bash
-# Claude Codeの設定ファイルに追加
-claude mcp add --scope user takoeight0821-skills https://github.com/takoeight0821/skills
-```
-
-または、`.claude/settings.json`に手動で追加：
+Claude Codeでこのプラグインを使用するには、`~/.claude/settings.json`に追加します：
 
 ```json
 {
@@ -23,6 +16,12 @@ claude mcp add --scope user takoeight0821-skills https://github.com/takoeight082
     "https://github.com/takoeight0821/skills"
   ]
 }
+```
+
+または、Claude Codeのコマンドでインストール：
+
+```bash
+claude plugin add https://github.com/takoeight0821/skills
 ```
 
 ## 含まれるスキル
@@ -60,6 +59,10 @@ mkdir -p skills/my-skill
 ```
 
 `SKILL.md`にはYAMLフロントマター（name, description）とスキルの内容をマークダウンで記述します。
+
+## 関連リポジトリ
+
+- [takoeight0821/jig](https://github.com/takoeight0821/jig) - VM/Docker管理、スキル同期を行うCLIツール（このリポジトリから分離）
 
 ## ライセンス
 
