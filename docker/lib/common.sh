@@ -1,1 +1,0 @@
-../../multipass/lib/common.sh
