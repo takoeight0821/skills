@@ -13,6 +13,3 @@
 - [Tracks Registry](./tracks.md)
 - [Tracks Directory](./tracks/)
 
-## Guides
-- [Docker & SSH Agent Forwarding (macOS)](../docs/research/docker-ssh-agent-forwarding-macos.md)
-- [Multipass & SSH Agent Forwarding (macOS)](../docs/research/macos-multipass-ssh-agent-forwarding.md)

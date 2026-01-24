@@ -1,104 +1,68 @@
-# Claude Skills
+# takoeight0821-skills
 
-Claude Codeのagent skillを管理する共用リポジトリです。`skills` CLI（または `mise`）を使って各プロジェクトの`.claude/skills`やグローバルの`~/.claude/skills`に展開して利用します。
+Claude Code Plugin: 研究・開発向けスキルコレクション
 
-## 必要条件
+## 概要
 
-- Git
-- [Multipass](https://multipass.run/) - VM管理の場合
-- [Docker](https://www.docker.com/) - コンテナ管理の場合
-- Go 1.22+ - `skills` CLIのインストールに必要
-- [mise](https://mise.jdx.dev/) - タスクランナーとして使用する場合（任意）
+このリポジトリは、Claude Codeのプラグインとして使用できるスキル集です。GitHubリポジトリ、ソフトウェアプロジェクト、学術論文の調査などをサポートします。
 
-## skills CLI（推奨）
+## インストール
 
-VM管理、コンテナ管理、スキル同期を統合したGo製のCLIツール `skills` の使用を推奨します。
+Claude Codeでこのプラグインを使用するには、`~/.claude/settings.json`に追加します：
 
-### インストール
-
-```bash
-# Goを使ってインストール
-go install github.com/takoeight0821/skills/jig/cmd/skills@latest
+```json
+{
+  "plugins": [
+    "https://github.com/takoeight0821/skills"
+  ]
+}
 ```
 
-### クイックスタート
+または、Claude Codeのコマンドでインストール：
 
 ```bash
-# 初期設定
-skills config init
-
-# VMの作成と起動
-skills vm launch
-
-# スキルの同期（グローバル）
-skills sync --global --apply
-
-# Claude Codeの実行
-skills vm claude
+claude plugin add https://github.com/takoeight0821/skills
 ```
 
-詳細は [jig/README.md](jig/README.md) を参照してください。
+## 含まれるスキル
 
-## 使い方
+### /research
+GitHubリポジトリ、ソフトウェアプロジェクト、学術論文を調査し、包括的なマークダウンレポートを生成します。
 
-### スキルの同期
+### /review-plan
+コード内の`review:`または`review(username):`コメントを検索し、コードレビュー指摘への対応計画を作成します。
 
-`skills sync` コマンドを使用して、本リポジトリのスキルをローカル環境に同期します。
-
-#### グローバルに同期（~/.claude/skills）
-
-```bash
-# プレビュー（dry-run）
-skills sync --global --dry-run
-
-# 実際に同期
-skills sync --global --apply
-```
-
-#### プロジェクトに同期（.claude/skills）
-
-```bash
-# プレビュー（dry-run）
-skills sync --project --dry-run
-
-# 実際に同期
-skills sync --project --apply
-```
-
-### 開発環境の管理
-
-#### Multipass VM
-
-```bash
-skills vm launch   # 作成と起動
-skills vm ssh      # SSH接続
-skills vm stop     # 停止
-```
-
-#### Docker Container
-
-```bash
-skills docker launch   # ビルドと起動
-skills docker ssh      # シェル接続
-skills docker stop     # 停止
-```
+### /clean-comments
+コード内のコメントを最適化し、不要なコメントを削除、必要なコメントを改善します。
 
 ## ディレクトリ構造
 
 ```
-/path/to/skills/                # クローンしたリポジトリ
-├── skills/                     # 同期対象のスキル
-│   └── my-skill/
-│       ├── SKILL.md
-│       └── ...
-├── jig/                        # skills CLIのソースコード
-│   ├── cmd/skills/             # エントリポイント
-│   └── ...
-├── docker/                     # Docker関連ファイル
-├── multipass/                  # Multipass関連ファイル
-├── install.sh                  # 旧インストールスクリプト（mise用）
-└── README.md
+/
+├── .claude-plugin/     # プラグイン設定
+│   └── plugin.json     # プラグインメタデータ
+├── skills/             # Claude Codeスキル
+│   ├── clean-comments/ # コメント最適化スキル
+│   ├── research/       # リサーチスキル
+│   └── review-plan/    # レビュー対応スキル
+├── conductor/          # プロジェクト管理ドキュメント
+├── CLAUDE.md           # Claude Code向けガイダンス
+└── LICENSE             # MITライセンス
 ```
+
+## スキルの追加
+
+新しいスキルを追加するには、`skills/`ディレクトリに新しいフォルダを作成し、`SKILL.md`ファイルを配置します：
+
+```bash
+mkdir -p skills/my-skill
+```
+
+`SKILL.md`にはYAMLフロントマター（name, description）とスキルの内容をマークダウンで記述します。
+
+## 関連リポジトリ
+
+- [takoeight0821/jig](https://github.com/takoeight0821/jig) - VM/Docker管理、スキル同期を行うCLIツール（このリポジトリから分離）
 
 ## ライセンス
 
