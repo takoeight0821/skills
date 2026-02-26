@@ -2,12 +2,15 @@
 name: review-doc
 description: >
   This skill should be used when the user asks to review, check, proofread, improve,
-  or give feedback on a document or Markdown file. Evaluates structure, accuracy,
+  grade, or give feedback on a document or Markdown file. Evaluates structure, accuracy,
   writing quality, practicality, and maintainability using a five-criteria grading system.
+  Optionally validates claims against external sources via WebSearch.
   Triggers: "review doc", "review this document", "review this markdown",
   "check my document", "check this README", "proofread", "give feedback on this doc",
-  "document review", "improve my documentation", "docs review",
-  "ドキュメントをレビュー", "レビューして", "ドキュメントのチェック", "文章レビュー".
+  "document review", "improve my documentation", "docs review", "grade this document",
+  "fact-check this doc", "validate claims in this document",
+  "ドキュメントをレビュー", "レビューして", "ドキュメントのチェック", "文章レビュー",
+  "文章を改善して", "ドキュメントの品質チェック".
 ---
 
 # Review Doc — Document Review
@@ -36,9 +39,19 @@ Use the Grep tool to scan the target file with the regex patterns listed in [ref
 
 ### Step 4: Review across five criteria
 
-Evaluate the target document across the five criteria below. For a quick review, use [references/review-checklist.md](references/review-checklist.md) instead of the full criteria. For each criterion, assign a grade of **A (Excellent) / B (Good) / C (Needs Improvement) / D (Requires Revision)** and provide specific feedback. Reflect the Step 3 detection results in Criteria 3 and 5.
+Evaluate the target document across the five criteria below. For a quick review, use [references/review-checklist.md](references/review-checklist.md) instead of the full criteria. For each criterion, assign a grade of **A (Excellent) / B (Good) / C (Needs Improvement) / D (Requires Revision)** and provide specific feedback. Reflect the Step 3 detection results in Criteria 3 and 5. Flag any claims you are uncertain about for verification in Step 5.
 
-### Step 5: Output the review results
+Note: grades for Criteria 2, 4, and 5 may be adjusted in Step 5 based on external validation results.
+
+### Step 5: Validate review with external sources
+
+Use WebSearch and WebFetch to cross-check the review findings against authoritative external sources.
+Follow the complete validation workflow in [references/web-validation.md](references/web-validation.md).
+This step validates Criteria 2 (Accuracy), 4 (Practicality), and 5 (Maintainability).
+If the document is internal-only or contains no verifiable claims, skip this step and note the reason.
+If WebSearch and WebFetch tools are not available in the current environment, skip this step and note "External validation tools unavailable" in the output.
+
+### Step 6: Output the review results
 
 Output the review results in the following format:
 
@@ -47,13 +60,13 @@ Output the review results in the following format:
 
 ### Summary
 
-| Criterion | Grade | Comment |
-|-----------|-------|---------|
-| Structure | [grade] | ... |
-| Accuracy & Completeness | [grade] | ... |
-| Writing Quality | [grade] | ... |
-| Practicality | [grade] | ... |
-| Maintainability | [grade] | ... |
+| Criterion | Grade | Validation | Comment |
+|-----------|-------|------------|---------|
+| Structure | [grade] | -- | ... |
+| Accuracy & Completeness | [grade] | [High/Medium/Low] | ... |
+| Writing Quality | [grade] | -- | ... |
+| Practicality | [grade] | [High/Medium/Low] | ... |
+| Maintainability | [grade] | [High/Medium/Low] | ... |
 
 ### Detailed Feedback
 
@@ -71,6 +84,18 @@ Output the review results in the following format:
 
 #### 5. Maintainability
 ...
+
+### External Validation
+
+| # | Claim | Type | Classification | Source |
+|---|-------|------|----------------|--------|
+| 1 | ... | ... | ... | ... |
+
+**Grade adjustments:**
+- (List any grade changes and reasons, or "None")
+
+**Skipped / Notes:**
+- (If validation was skipped, state the reason here)
 
 ### Prioritized Improvement Actions
 
@@ -110,3 +135,4 @@ For full checklists and grading rubrics, see [references/review-criteria-full.md
 - [references/review-checklist.md](references/review-checklist.md) — Quick review checklist (for quick reviews)
 - [references/temporal-expressions.md](references/temporal-expressions.md) — Temporal expression detection patterns and fix guide
 - [references/textlint-integration.md](references/textlint-integration.md) — textlint configuration detection, execution, and setup suggestions
+- [references/web-validation.md](references/web-validation.md) — WebSearch validation workflow, query templates, and scoring rules
