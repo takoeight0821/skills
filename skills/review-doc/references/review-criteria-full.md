@@ -46,6 +46,9 @@ Evaluate technical accuracy and topic coverage.
 | C | Contains inaccurate information or important topics are missing |
 | D | Contains critical errors or content is significantly incomplete |
 
+**Note:** Grades for this criterion may be adjusted in Step 5 (WebSearch Validation)
+if external sources contradict the review findings. See [web-validation.md](web-validation.md).
+
 ## Criterion 3: Writing Quality
 
 Evaluate readability, consistency, and scannability of the writing.
@@ -93,6 +96,9 @@ Evaluate whether readers can take action based on the document.
 | C | Lacks practicality; readers need to search for additional information |
 | D | Too abstract to act on |
 
+**Note:** Grades for this criterion may be adjusted in Step 5 (WebSearch Validation)
+if external sources contradict the review findings. See [web-validation.md](web-validation.md).
+
 ## Criterion 5: Maintainability
 
 Evaluate whether the document can be maintained over the long term.
@@ -113,3 +119,6 @@ Evaluate whether the document can be maintained over the long term.
 | B | Generally maintainable, but some room for improvement |
 | C | Maintenance concerns exist with high risk of becoming outdated |
 | D | Difficult to maintain; likely to become outdated quickly |
+
+**Note:** Grades for this criterion may be adjusted in Step 5 (WebSearch Validation)
+if external sources contradict the review findings. See [web-validation.md](web-validation.md).
