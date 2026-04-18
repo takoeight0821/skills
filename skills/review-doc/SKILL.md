@@ -1,16 +1,19 @@
 ---
 name: review-doc
 description: >
-  This skill should be used when the user asks to review, check, proofread, improve,
-  grade, or give feedback on a document or Markdown file. Evaluates structure, accuracy,
-  writing quality, practicality, and maintainability using a five-criteria grading system.
-  Optionally validates claims against external sources via WebSearch.
-  Triggers: "review doc", "review this document", "review this markdown",
-  "check my document", "check this README", "proofread", "give feedback on this doc",
-  "document review", "improve my documentation", "docs review", "grade this document",
-  "fact-check this doc", "validate claims in this document",
-  "ドキュメントをレビュー", "レビューして", "ドキュメントのチェック", "文章レビュー",
-  "文章を改善して", "ドキュメントの品質チェック".
+  Review a prose Markdown document (README, design doc, spec, article, proposal)
+  for structure, accuracy, writing quality, practicality, and maintainability,
+  producing A/B/C/D grades and optional WebSearch fact-checking.
+  TRIGGER when the user explicitly asks to review, proofread, fact-check, grade, or
+  give feedback on a specific Markdown document or documentation file — e.g.,
+  "review this README", "proofread this doc", "docs review", "fact-check this doc",
+  "ドキュメントをレビュー", "文章レビュー", "ドキュメントの品質チェック".
+  SKIP when the review target is not a prose document — do NOT trigger for reviewing
+  code, pull requests, diffs, commits, configuration files, or Claude Code artifacts
+  (SKILL.md files / skills / subagents / agents / slash commands / hooks / plugins /
+  MCP servers). Skill/agent triggering-description reviews belong to skill-creator
+  or plugin-dev:skill-development, not this skill. Also skip bare "review" or
+  "レビューして" with no document target specified.
 ---
 
 # Review Doc — Document Review
