@@ -11,7 +11,6 @@ Claude Code Plugin: 研究・開発向けスキルコレクション
 ### Skills
 
 - **research**: GitHubリポジトリ、ソフトウェアプロジェクト、学術論文を調査し、包括的なマークダウンレポートを生成
-- **review-plan**: コード内の`review:`コメントを検索し、コードレビュー指摘への対応計画を作成
 - **clean-comments**: コード内のコメントを最適化し、不要なコメントを削除
 
 ### Plugin Configuration
@@ -26,5 +25,5 @@ Claude Code Plugin: 研究・開発向けスキルコレクション
 
 ## User Experience
 
-- **Skill-Based**: `/research`, `/review-plan`, `/clean-comments`などのスキルコマンドで機能を呼び出し
+- **Skill-Based**: `/research`, `/clean-comments`などのスキルコマンドで機能を呼び出し
 - **Plugin Integration**: Claude Codeのプラグインとしてシームレスに統合

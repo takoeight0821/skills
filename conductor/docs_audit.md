@@ -17,8 +17,6 @@
 | `docs/research/docker-ssh-agent-forwarding-macos.md` | Detailed guide on Docker + SSH Agent Forwarding on macOS. | Reference | Keep as a deep-dive reference. Link from `conductor/index.md` or a new "Guides" section. |
 | `docs/research/macos-multipass-ssh-agent-forwarding.md` | Detailed guide on Multipass + SSH Agent Forwarding on macOS. | Reference | Keep as a deep-dive reference. Link from `conductor/index.md` or a new "Guides" section. |
 | `skills/research/SKILL.md` | Likely a template or placeholder. | TBD | Verify if this is needed. If it's a template, move to `templates/` or document its usage. |
-| `skills/review-plan/SKILL.md` | Review plan skill definition. | Active | Part of the skills library. |
-| `skills/review-plan/references/categories.md` | Reference for the review plan skill. | Active | Part of the skills library. |
 
 ## 2. Redundancy & Outdated Information Analysis
 

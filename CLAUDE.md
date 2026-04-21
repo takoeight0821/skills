@@ -15,7 +15,6 @@ This repository is a Claude Code Plugin that provides skills for research and de
 - `skills/` - Claude Code skills (SKILL.md files)
   - `clean-comments/` - Code comment optimization skill
   - `research/` - Repository and paper research skill
-  - `review-plan/` - Code review response planning skill
 - `.claude-plugin/` - Claude Code plugin configuration
   - `plugin.json` - Plugin metadata
 - `conductor/` - Project management documentation
