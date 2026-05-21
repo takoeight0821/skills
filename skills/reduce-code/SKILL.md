@@ -32,7 +32,9 @@ Pull them now.
 
 **Rule of Three（コード重複）**: 同じロジックの重複が 3 箇所以上になって初めて関数として
 抽出する。2 箇所の重複はまだ抽象化のタイミングではない — 3 例目で初めて適切な抽象の形が
-見えてくることが多い（Martin Fowler / Don Roberts）。
+見えてくることが多い（Martin Fowler / Don Roberts）。逆もまた真：3 箇所以上の重複が
+すでに存在するなら、抽象を**導入する**ことが削減の手段になる。3 呼び出し元 × n 行が
+1 つの関数定義 + 3 つの短い呼び出しに置き換わるなら、抽出がトータルを減らす。
 
 **YAGNI（インターフェース・抽象型）**: インターフェースは 2 つ以上の具体的な実装が存在するか
 直近で必要になるまで定義しない。実装が 1 つしかないインターフェースは将来の拡張を見越した
@@ -49,6 +51,26 @@ Pull them now.
   ```
   From the file extensions and directory layout, determine the primary language(s).
   Show the user a summary and confirm the scope before proceeding.
+
+### Step 1b: PR で導入された抽象化のインベントリ（PR 対象の場合のみ）
+
+対象が git diff / PR の場合、まず **PR で新たに追加された** 関数・型・定数・モジュールを
+リストアップする：
+
+```bash
+git diff main...HEAD | grep '^+func\|^+type\|^+const'   # Go
+git diff main...HEAD | grep '^+def \|^+class '           # Python
+git diff main...HEAD | grep '^+export function\|^+export class'  # TS/JS
+```
+
+各抽象について、**同 PR 内または既存コードに適用できる箇所が他にないか** を確認する：
+- 同 PR 内で同等ロジックを手書きしている箇所がないか
+- 既存コードで同じパターンが使われていて、新しい抽象に置き換えると行数が減らないか
+
+**判断基準**：
+- 置き換え後のコードが読みやすく、かつ行数も減る → 高インパクト提案として Step 5 のレポートに含める
+- 行数は変わらないが複雑性が下がる → 低優先で提案（節約 = 0 lines と記載）
+- 行数が増える → 提案しない
 
 ### Step 2: High-impact checks (package/module boundaries)
 
@@ -145,6 +167,17 @@ zero-valued or always recomputed from other fields.
 See `references/go-tactics.md` for Go-specific patterns (single-line error checks, etc.).
 Other languages: apply equivalent idioms where the formatter preserves them.
 
+**g. 重複パターンの抽出（Rule of Three による削減）**
+3 箇所以上で同じロジックが繰り返されている場合、関数・メソッド・型への抽出が
+トータルの行数を減らす。Step 4a（呼び出し元 < 3 ならインライン化）の逆面。
+
+探し方：ripgrep `--multiline` で同じ複数行パターンを検索するか、
+バリデーション・変換・フォーマット等の定型処理を手動でリストアップ。
+
+節約の試算：(繰り返し回数 × 重複行数) − (関数定義行数 + 呼び出し行数 × 繰り返し回数)
+
+節約がプラス、かつ意味のある名前をつけられる場合のみ提案する。
+
 ### Step 5: Output the report
 
 Print the report in this format. Sort sections by estimated savings descending.
@@ -158,6 +191,8 @@ Print the report in this format. Sort sections by estimated savings descending.
 |---|---|---|---|
 | `utils/` module consolidation | ~200 lines | Medium | No external imports (verified) |
 | `--export` flag removal | ~60 lines | Low | Confirm unused in docs |
+| Extract `parseConfig()` (3 duplicates) | ~30 lines | Low | None |
+| Apply new `formatDate()` to existing callers | ~24 lines | Low | PR introduces formatDate |
 | Single-call functions (4 found) | ~18 lines | Low | None |
 | `format_date` → stdlib | ~8 lines | Low | Check Python version ≥ 3.2 |
 
