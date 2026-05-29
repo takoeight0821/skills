@@ -44,9 +44,9 @@ Temporal expressions are the biggest factor in shortening a document's "shelf li
 
 | Detection pattern | Fix example |
 |-------------------|-------------|
-| 従来の方法、以前は | v2.x以前の方法 |
+| 従来の方法、以前は、かつて | v2.x以前の方法 |
 | 新しい機能、新機能 | v3.0で追加された機能 |
-| previously, the old way | prior to v3.0 |
+| previously, the old way, formerly | prior to v3.0 |
 | the new feature, new functionality | feature added in v3.0 |
 
 ### 5. State-transition sentence-ending patterns
@@ -78,7 +78,7 @@ Use the following patterns with the Grep tool to scan the target file during rev
 ### Japanese patterns
 
 ```
-最近|先日|先月|来月|今後|近年|ここ数年|最新の|現在の|現行の|最新版|新しいバージョン|近いうちに|そのうち|対応予定|従来の|以前は|新しい機能|新機能
+最近|先日|先月|来月|今後|近年|ここ数年|最新の|現在の|現行の|最新版|新しいバージョン|近いうちに|そのうち|対応予定|従来の|以前は|かつて|新しい機能|新機能
 ```
 
 ### English patterns
