@@ -62,6 +62,7 @@ Evaluate readability, consistency, and scannability of the writing.
 - [ ] Is scannability high (appropriate use of bullet lists, tables, code blocks)?
 - [ ] Is emphasis (bold, links) kept to 10% or less of the content?
 - [ ] Are temporal expressions made specific ("recently", "currently" → specific dates/versions; refer to Step 3 detection results)?
+- [ ] Is the text free of process scaffolding (stance announcements like "to be honest", verification notes like "to avoid circularity", drafting-stage labels like "draft"/"たたき台"; see [process-scaffolding.md](process-scaffolding.md) and apply its discrimination test)?
 
 **Grading Criteria:**
 

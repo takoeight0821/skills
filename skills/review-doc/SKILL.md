@@ -36,9 +36,12 @@ Identify relevant style guides and project conventions for the review:
 - Load the review criteria from [references/review-criteria-full.md](references/review-criteria-full.md)
 - If the project has textlint configured, follow [references/textlint-integration.md](references/textlint-integration.md) to run mechanical checks and reflect findings in the corresponding criteria
 
-### Step 3: Scan for temporal expressions
+### Step 3: Scan for temporal expressions and process scaffolding
 
-Use the Grep tool to scan the target file with the regex patterns listed in [references/temporal-expressions.md](references/temporal-expressions.md). Reflect the detection results in the Writing Quality (Criterion 3) and Maintainability (Criterion 5) evaluations in Step 4.
+Use the Grep tool to scan the target file with two pattern sets:
+
+- [references/temporal-expressions.md](references/temporal-expressions.md) — expressions that go stale over time. Reflect results in the Writing Quality (Criterion 3) and Maintainability (Criterion 5) evaluations in Step 4.
+- [references/process-scaffolding.md](references/process-scaffolding.md) — spans that describe how the document was made rather than its subject (stance announcements, verification notes, drafting-stage labels). Pass every hit through the discrimination test in that file before flagging it, and reflect results in the Writing Quality (Criterion 3) evaluation only.
 
 ### Step 4: Review across five criteria
 
@@ -137,5 +140,6 @@ For full checklists and grading rubrics, see [references/review-criteria-full.md
 - [references/review-criteria-full.md](references/review-criteria-full.md) — Full review criteria with checklists and grading rubrics
 - [references/review-checklist.md](references/review-checklist.md) — Quick review checklist (for quick reviews)
 - [references/temporal-expressions.md](references/temporal-expressions.md) — Temporal expression detection patterns and fix guide
+- [references/process-scaffolding.md](references/process-scaffolding.md) — Process-scaffolding detection patterns and fix guide (stance announcements, verification notes, drafting-stage labels)
 - [references/textlint-integration.md](references/textlint-integration.md) — textlint configuration detection, execution, and setup suggestions
 - [references/web-validation.md](references/web-validation.md) — WebSearch validation workflow, query templates, and scoring rules

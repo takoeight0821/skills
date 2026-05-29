@@ -24,6 +24,7 @@ A quick review checklist covering the essentials (targets B-C grade range). For 
 - [ ] Is the writing style consistent?
 - [ ] Does it use bullet lists, tables, and code blocks effectively?
 - [ ] Are temporal expressions made specific ("recently", "currently" → dates/versions)?
+- [ ] Is it free of process scaffolding (stance announcements, verification notes, "draft"/"たたき台" labels)?
 
 ## Practicality
 
