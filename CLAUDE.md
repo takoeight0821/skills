@@ -17,7 +17,6 @@ This repository is a Claude Code Plugin that provides skills for research and de
   - `git-status/` - Repository/branch/PR status explanation skill
   - `reduce-code/` - Code reduction / dead-code & bloat removal skill
   - `research/` - Repository and paper research skill
-  - `review-doc/` - Prose Markdown document review skill
 - `.claude-plugin/` - Claude Code plugin configuration
   - `plugin.json` - Plugin metadata
 - `conductor/` - Project management documentation
